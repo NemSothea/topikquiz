@@ -404,9 +404,6 @@
         function generateQuestions() {
             questions = [];
             
-            // Create a copy of vocabulary to work with
-            let vocabPool = [...vocabulary];
-            
             // For each word in vocabulary, create a question
             vocabulary.forEach((vocab, index) => {
                 let question, correctAnswer, options;
@@ -438,27 +435,40 @@
                     }
                     
                 } else if (currentQuizType === 'fill-in-blank') {
-                    // Create fill-in-the-blank questions
+                    // Create fill-in-the-blank questions with better formatting
                     const sentenceTemplates = [
-                        `The Korean word for "${vocab.english}" is __________.`,
-                        `"${vocab.korean}" means __________ in English.`,
-                        `__________ is the English translation of "${vocab.korean}".`
+                        {
+                            template: `The Korean word for "${vocab.english}" is __________.`,
+                            correctAnswer: vocab.korean,
+                            type: 'korean'
+                        },
+                        {
+                            template: `"${vocab.korean}" means __________ in English.`,
+                            correctAnswer: vocab.english,
+                            type: 'english'
+                        },
+                        {
+                            template: `__________ is the English translation of "${vocab.korean}".`,
+                            correctAnswer: vocab.english,
+                            type: 'english'
+                        },
+                        {
+                            template: `__________ is the Korean word for "${vocab.english}".`,
+                            correctAnswer: vocab.korean,
+                            type: 'korean'
+                        }
                     ];
                     
                     const templateIndex = index % sentenceTemplates.length;
-                    question = sentenceTemplates[templateIndex].replace('__________', '_______');
-                    
-                    if (templateIndex === 0 || templateIndex === 2) {
-                        correctAnswer = vocab.korean;
-                    } else {
-                        correctAnswer = vocab.english;
-                    }
+                    const template = sentenceTemplates[templateIndex];
+                    question = template.template;
+                    correctAnswer = template.correctAnswer;
                     
                     // Generate options
                     options = [correctAnswer];
                     while (options.length < 4) {
                         let randomAnswer;
-                        if (templateIndex === 0 || templateIndex === 2) {
+                        if (template.type === 'korean') {
                             // Need Korean word options
                             randomAnswer = vocabulary[Math.floor(Math.random() * vocabulary.length)].korean;
                         } else {
@@ -494,7 +504,15 @@
             }
             
             const currentQuestion = questions[currentQuestionIndex];
-            questionEl.textContent = currentQuestion.question;
+            
+            // Format the question with proper blank space
+            if (currentQuizType === 'fill-in-blank') {
+                // Replace the blank placeholder with an underlined space
+                const formattedQuestion = currentQuestion.question.replace('__________', '<span style="border-bottom: 2px dashed #4e54c8; padding: 0 10px;">__________</span>');
+                questionEl.innerHTML = formattedQuestion;
+            } else {
+                questionEl.textContent = currentQuestion.question;
+            }
             
             // Clear previous options
             optionsEl.innerHTML = '';
@@ -507,7 +525,7 @@
             currentQuestion.options.forEach((option, index) => {
                 const optionEl = document.createElement('div');
                 optionEl.className = 'option';
-                optionEl.textContent = `${index + 1}. ${option}`;
+                optionEl.textContent = `${String.fromCharCode(65 + index)}. ${option}`; // A, B, C, D
                 optionEl.dataset.value = option;
                 
                 optionEl.addEventListener('click', () => {
