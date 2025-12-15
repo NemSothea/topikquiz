@@ -532,7 +532,8 @@
                     <i class="fas fa-pen-fancy"></i>
                     <div>
                         <h1>TOPIK Writing Complete Practice</h1>
-                        <div class="subtitle">All 52 Questions from Your File</div>
+                        <!-- UPDATED: Changed from 52 to 54 -->
+                        <div class="subtitle">All 54 Questions from Your File</div>
                     </div>
                 </div>
                 <div class="stats">
@@ -541,7 +542,7 @@
                         <div class="stat-label">Question</div>
                     </div>
                     <div class="stat-box">
-                        <div class="stat-value" id="total-questions">52</div>
+                        <div class="stat-value" id="total-questions">54</div> <!-- Updated to 54 -->
                         <div class="stat-label">Total</div>
                     </div>
                     <div class="stat-box">
@@ -584,7 +585,7 @@
                         <i class="fas fa-times-circle"></i> <span id="incorrect-count-display">0</span> Incorrect
                     </div>
                     <div class="status-item status-unanswered">
-                        <i class="fas fa-question-circle"></i> <span id="unanswered-count-display">52</span> Unanswered
+                        <i class="fas fa-question-circle"></i> <span id="unanswered-count-display">54</span> Unanswered <!-- Updated to 54 -->
                     </div>
                 </div>
 
@@ -671,7 +672,8 @@
 
                 <h3><i class="fas fa-trophy"></i> Your Progress</h3>
                 <div class="hint">
-                    <strong>Questions Completed:</strong> <span id="completed-count">0</span>/52
+                    <!-- UPDATED: Changed from 52 to 54 -->
+                    <strong>Questions Completed:</strong> <span id="completed-count">0</span>/54
                 </div>
                 <div class="hint">
                     <strong>Current Score:</strong> <span id="current-score">0%</span>
@@ -691,7 +693,8 @@
         </div>
 
         <div class="footer">
-            <p>TOPIK Writing Complete Practice App • All 52 questions from your file • Use for educational purposes only
+            <!-- UPDATED: Changed from 52 to 54 -->
+            <p>TOPIK Writing Complete Practice App • All 54 questions from your file • Use for educational purposes only
             </p>
             <p>Based on actual TOPIK exam materials from 52nd to 102nd exams</p>
         </div>
@@ -719,7 +722,7 @@
                 question: "우리는 기분이 좋으면 밝은 표정을 짓는다. 그리고 기분이 좋지 않으면 표정이 어두워진다. 왜냐하면 ( ㄱ ). 그런데 이와 반대로 표정이 우리의 감정에 영향을 주기도 한다. 그래서 기분이 안 좋을 때 밝은 표정을 지으면 기분도 따라서 좋아진다. 그러므로 우울할 때일수록 ( ㄴ ) 것이 좋다.",
                 answers: {
                     a: "감정이 표정에 영향을 주기 때문이다",
-                    b: "밝은 표정을 짓는/하는, 표정을 밝게 짓는/하는"
+                    b: "밝은 표정을 짓는 / 표정을 밝게 짓는"
                 },
                 difficulty: "easy"
             },
@@ -1464,10 +1467,11 @@
             }
         }
 
-        // Skip the current question
+        // Skip the current question - FIXED
         function skipQuestion() {
-            userAnswers[currentQuestionIndex].checked = true;
-            userAnswers[currentQuestionIndex].correct = false;
+            const originalIndex = topikExams.findIndex(q => q.id === filteredQuestions[currentQuestionIndex].id);
+            userAnswers[originalIndex].checked = true;
+            userAnswers[originalIndex].correct = false;
             updateStats();
 
             if (currentQuestionIndex < filteredQuestions.length - 1) {
@@ -1475,36 +1479,48 @@
             }
         }
 
-        // Check the answers
+        // Check the answers - IMPROVED
         function checkAnswers() {
             const originalIndex = topikExams.findIndex(q => q.id === filteredQuestions[currentQuestionIndex].id);
             userAnswers[originalIndex].checked = true;
 
-            // Simple answer checking (in a real app, this would be more sophisticated)
-            const userA = userAnswers[originalIndex].a.trim().toLowerCase();
-            const userB = userAnswers[originalIndex].b.trim().toLowerCase();
-            const sampleA = filteredQuestions[currentQuestionIndex].answers.a.toLowerCase();
-            const sampleB = filteredQuestions[currentQuestionIndex].answers.b.toLowerCase();
+            // Get user answers and sample answers
+            const userA = userAnswers[originalIndex].a.trim();
+            const userB = userAnswers[originalIndex].b.trim();
+            const sampleA = filteredQuestions[currentQuestionIndex].answers.a;
+            const sampleB = filteredQuestions[currentQuestionIndex].answers.b;
 
-            // Check if answers are similar enough (basic check)
+            // Check if answers are similar enough
             let isCorrectA = false;
             let isCorrectB = false;
 
-            // Check if user answer contains any of the sample answer options
-            const sampleAOptions = sampleA.split('/').map(opt => opt.trim());
-            const sampleBOptions = sampleB.split('/').map(opt => opt.trim());
+            // Helper function to normalize Korean text for comparison
+            function normalizeKoreanText(text) {
+                return text
+                    .toLowerCase()
+                    .replace(/\s+/g, ' ')  // Normalize multiple spaces to single space
+                    .replace(/[.,?!/]/g, '') // Remove common punctuation
+                    .trim();
+            }
 
+            // Normalize user answers
+            const normalizedUserA = normalizeKoreanText(userA);
+            const normalizedUserB = normalizeKoreanText(userB);
+
+            // Check if user answer contains any of the sample answer options
+            const sampleAOptions = sampleA.split('/').map(opt => normalizeKoreanText(opt.trim()));
+            const sampleBOptions = sampleB.split('/').map(opt => normalizeKoreanText(opt.trim()));
+
+            // For each sample option, check if it's in the user's answer OR if user's answer is in the option
             for (const option of sampleAOptions) {
-                if (userA.includes(option) || option.includes(userA) ||
-                    userA.replace(/[^a-z가-힣]/g, '') === option.replace(/[^a-z가-힣]/g, '')) {
+                if (normalizedUserA.includes(option) || option.includes(normalizedUserA)) {
                     isCorrectA = true;
                     break;
                 }
             }
 
             for (const option of sampleBOptions) {
-                if (userB.includes(option) || option.includes(userB) ||
-                    userB.replace(/[^a-z가-힣]/g, '') === option.replace(/[^a-z가-힣]/g, '')) {
+                if (normalizedUserB.includes(option) || option.includes(normalizedUserB)) {
                     isCorrectB = true;
                     break;
                 }
@@ -1542,6 +1558,13 @@
             const feedbackHint = document.createElement('div');
             feedbackHint.className = 'hint feedback-hint';
             feedbackHint.innerHTML = `<i class="fas fa-comment"></i> <strong>Feedback:</strong> ${feedback}`;
+            
+            // Add which part was correct/wrong
+            if (isCorrectA !== isCorrectB) {
+                const partCorrect = isCorrectA ? "(ㄱ)" : "(ㄴ)";
+                feedbackHint.innerHTML += `<br><small>${partCorrect} was correct. Try again on the other part!</small>`;
+            }
+            
             sampleAnswersDiv.prepend(feedbackHint);
         }
 
