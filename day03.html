@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국어 단어 퀴즈</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --border-color: #ddd;
+            --correct-color: #4CAF50;
+            --incorrect-color: #f44336;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        .dark-mode {
+            --primary-color: #6d9eeb;
+            --secondary-color: #4a6fa5;
+            --bg-color: #1a1a2e;
+            --text-color: #e6e6e6;
+            --card-bg: #16213e;
+            --border-color: #394867;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: var(--transition);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.2rem;
+        }
+
+        .theme-toggle {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .instructions {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .instructions h2 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
+        .quiz-container {
+            display: grid;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .quiz-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+        }
+
+        .quiz-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .quiz-card:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .word-korean {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .word-number {
+            background-color: var(--primary-color);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .example-sentence {
+            font-style: italic;
+            margin: 15px 0;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.03);
+            border-radius: 8px;
+            color: var(--text-color);
+            border-left: 3px solid var(--secondary-color);
+        }
+
+        .dark-mode .example-sentence {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .option {
+            padding: 12px 15px;
+            background-color: rgba(0, 0, 0, 0.03);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .dark-mode .option {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .option:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .option.selected {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .option.correct {
+            background-color: var(--correct-color);
+            color: white;
+            border-color: var(--correct-color);
+        }
+
+        .option.incorrect {
+            background-color: var(--incorrect-color);
+            color: white;
+            border-color: var(--incorrect-color);
+        }
+
+        .answer-feedback {
+            margin-top: 15px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .answer-feedback.correct {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--correct-color);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .answer-feedback.incorrect {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--incorrect-color);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .quiz-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .quiz-btn {
+            padding: 12px 25px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quiz-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+
+        .quiz-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .score {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 20px 0;
+        }
+
+        .results-message {
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+        }
+
+        .restart-btn {
+            padding: 15px 30px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .restart-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 768px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            .quiz-controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .quiz-btn {
+                justify-content: center;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-language"></i> 한국어 단어 퀴즈</h1>
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i> 다크 모드
+            </button>
+        </header>
+
+        <section class="instructions">
+            <h2><i class="fas fa-info-circle"></i> 퀴즈 안내</h2>
+            <p>아래에 15개의 한국어 단어와 예문이 제시됩니다. 각 단어의 올바른 영어 뜻을 선택하세요. 모든 문제를 풀면 점수를 확인할 수 있습니다.</p>
+        </section>
+
+        <div class="quiz-container" id="quizContainer">
+            <!-- 퀴즈 카드들은 JavaScript로 동적 생성됩니다 -->
+        </div>
+
+        <div class="quiz-controls">
+            <button class="quiz-btn" id="prevBtn" disabled>
+                <i class="fas fa-arrow-left"></i> 이전 문제
+            </button>
+            <button class="quiz-btn" id="nextBtn">
+                다음 문제 <i class="fas fa-arrow-right"></i>
+            </button>
+            <button class="quiz-btn" id="submitBtn">
+                <i class="fas fa-paper-plane"></i> 퀴즈 제출
+            </button>
+        </div>
+
+        <div class="results" id="resultsContainer">
+            <h2><i class="fas fa-trophy"></i> 퀴즈 결과</h2>
+            <div class="score" id="scoreDisplay">0/15</div>
+            <p class="results-message" id="resultsMessage"></p>
+            <button class="restart-btn" id="restartBtn">
+                <i class="fas fa-redo"></i> 다시 풀기
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 한국어 단어 데이터
+        const vocabularyData = [
+            {
+                korean: "사고가 나다",
+                english: "Accident",
+                example: "부산으로 오던 기차가 사고가 났다.",
+                options: ["Accident", "Participate", "Wise", "Resource"]
+            },
+            {
+                korean: "참여하다",
+                english: "Participate",
+                example: "오늘 모임에는 외국인들이 많이 참여하였다.",
+                options: ["Accident", "Participate", "Material", "Cooperate"]
+            },
+            {
+                korean: "현명하다",
+                english: "Wise(smart)",
+                example: "사랑니에 문제가 있을 때는 빨리 뽑는 것이 현명하다.",
+                options: ["Wise(smart)", "Negotiate", "Burden", "Develop"]
+            },
+            {
+                korean: "자원",
+                english: "Resource",
+                example: "세계 각국은 남극의 자원을 개발하고자 공동 연구에 착수하다",
+                options: ["Resource", "Material", "Deliver", "Restore"]
+            },
+            {
+                korean: "물질",
+                english: "Material",
+                example: "소금은 물에 잘 녹는 물질이다.",
+                options: ["Resource", "Material", "Burden", "Possible"]
+            },
+            {
+                korean: "협상하다",
+                english: "Negotiate",
+                example: "노동자들은 사장과 직접 임금 문제를 협상하겠다고 밝혔다.",
+                options: ["Cooperate", "Negotiate", "Deliver", "Fluctuate"]
+            },
+            {
+                korean: "협조하다",
+                english: "Cooperate",
+                example: "파업을 막기 위해서는 노사가 서로 협조해야만 한다.",
+                options: ["Negotiate", "Cooperate", "Divide", "Develop"]
+            },
+            {
+                korean: "부담",
+                english: "Burden",
+                example: "해외여행은 경제적으로 크게 부담이 된다.",
+                options: ["Burden", "Resource", "Material", "Possible"]
+            },
+            {
+                korean: "복원하다",
+                english: "Restore",
+                example: "환경은 한 번 파괴되면 복원하기 힘들다.",
+                options: ["Restore", "Develop", "Deliver", "Fluctuate"]
+            },
+            {
+                korean: "변동하다",
+                english: "Fluctuate(change)",
+                example: "연초에 비해 물가가 크게 변동했다.",
+                options: ["Restore", "Fluctuate(change)", "Divide", "Cooperate"]
+            },
+            {
+                korean: "가능하다",
+                english: "Possible",
+                example: "간단한 수술은 부분 마취만으로도 수술이 가능하다.",
+                options: ["Possible", "Burden", "Resource", "Diligent"]
+            },
+            {
+                korean: "발달하다",
+                english: "Develop",
+                example: "과학 기술이 고도로 발달하다.",
+                options: ["Restore", "Develop", "Divide", "Deliver"]
+            },
+            {
+                korean: "부지런하다",
+                english: "Diligent(hard-working)",
+                example: "언니는 부지런해서 식구 중에 제일 먼저 일어나 마당 청소를 한다.",
+                options: ["Diligent(hard-working)", "Wise(smart)", "Possible", "Cooperate"]
+            },
+            {
+                korean: "분열하다",
+                english: "Divide",
+                example: "팀이 의견 차이로 분열되었다.",
+                options: ["Divide", "Deliver", "Negotiate", "Fluctuate"]
+            },
+            {
+                korean: "전달하다",
+                english: "Deliver",
+                example: "우편을 통해 편지를 전달하다.",
+                options: ["Divide", "Deliver", "Restore", "Develop"]
+            }
+        ];
+
+        // DOM 요소
+        const quizContainer = document.getElementById('quizContainer');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const themeToggle = document.getElementById('themeToggle');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const resultsMessage = document.getElementById('resultsMessage');
+        const restartBtn = document.getElementById('restartBtn');
+
+        // 상태 변수
+        let currentQuestion = 0;
+        let userAnswers = new Array(vocabularyData.length).fill(null);
+        let quizSubmitted = false;
+
+        // 퀴즈 초기화
+        function initQuiz() {
+            // 퀴즈 카드 생성
+            vocabularyData.forEach((word, index) => {
+                const quizCard = document.createElement('div');
+                quizCard.className = 'quiz-card';
+                quizCard.id = `question-${index}`;
+                quizCard.style.display = index === 0 ? 'block' : 'none';
+
+                // 옵션 버튼 생성
+                const optionsHtml = word.options.map(option => 
+                    `<div class="option" data-value="${option}">${option}</div>`
+                ).join('');
+
+                quizCard.innerHTML = `
+                    <div class="question-header">
+                        <div class="word-korean">${word.korean}</div>
+                        <div class="word-number">${index + 1}</div>
+                    </div>
+                    <p><strong>영어 뜻:</strong> <span id="correctAnswer-${index}" style="display:none;">${word.english}</span></p>
+                    <div class="example-sentence">
+                        <strong>예문:</strong> ${word.example}
+                    </div>
+                    <div class="options">
+                        ${optionsHtml}
+                    </div>
+                    <div class="answer-feedback" id="feedback-${index}"></div>
+                `;
+
+                quizContainer.appendChild(quizCard);
+            });
+
+            // 옵션 선택 이벤트 리스너 추가
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', handleOptionSelect);
+            });
+
+            // 버튼 상태 업데이트
+            updateButtonStates();
+        }
+
+        // 옵션 선택 처리
+        function handleOptionSelect(event) {
+            if (quizSubmitted) return;
+            
+            const selectedOption = event.target;
+            const questionCard = selectedOption.closest('.quiz-card');
+            const questionId = parseInt(questionCard.id.split('-')[1]);
+            
+            // 같은 질문의 다른 옵션 선택 해제
+            questionCard.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // 현재 옵션 선택
+            selectedOption.classList.add('selected');
+            
+            // 사용자 답변 저장
+            userAnswers[questionId] = selectedOption.dataset.value;
+            
+            // 피드백 숨기기
+            const feedback = document.getElementById(`feedback-${questionId}`);
+            feedback.style.display = 'none';
+            feedback.className = 'answer-feedback';
+            
+            // 버튼 상태 업데이트
+            updateButtonStates();
+        }
+
+        // 버튼 상태 업데이트
+        function updateButtonStates() {
+            // 이전 버튼
+            prevBtn.disabled = currentQuestion === 0;
+            
+            // 다음 버튼
+            nextBtn.disabled = currentQuestion === vocabularyData.length - 1;
+            
+            // 제출 버튼
+            const allAnswered = userAnswers.every(answer => answer !== null);
+            submitBtn.disabled = !allAnswered || quizSubmitted;
+        }
+
+        // 질문 이동
+        function goToQuestion(index) {
+            // 현재 질문 숨기기
+            document.getElementById(`question-${currentQuestion}`).style.display = 'none';
+            
+            // 새 질문 표시
+            currentQuestion = index;
+            document.getElementById(`question-${currentQuestion}`).style.display = 'block';
+            
+            // 버튼 상태 업데이트
+            updateButtonStates();
+        }
+
+        // 퀴즈 제출
+        function submitQuiz() {
+            quizSubmitted = true;
+            
+            // 점수 계산
+            let score = 0;
+            vocabularyData.forEach((word, index) => {
+                if (userAnswers[index] === word.english) {
+                    score++;
+                }
+                
+                // 피드백 표시
+                const feedback = document.getElementById(`feedback-${index}`);
+                const options = document.querySelectorAll(`#question-${index} .option`);
+                
+                if (userAnswers[index] === word.english) {
+                    feedback.textContent = "정답입니다!";
+                    feedback.className = 'answer-feedback correct';
+                    feedback.style.display = 'block';
+                    
+                    // 옵션 색상 표시
+                    options.forEach(opt => {
+                        if (opt.dataset.value === word.english) {
+                            opt.classList.add('correct');
+                        }
+                    });
+                } else {
+                    feedback.textContent = `틀렸습니다. 정답은 "${word.english}"입니다.`;
+                    feedback.className = 'answer-feedback incorrect';
+                    feedback.style.display = 'block';
+                    
+                    // 옵션 색상 표시
+                    options.forEach(opt => {
+                        if (opt.dataset.value === word.english) {
+                            opt.classList.add('correct');
+                        }
+                        if (opt.dataset.value === userAnswers[index]) {
+                            opt.classList.add('incorrect');
+                        }
+                    });
+                }
+            });
+            
+            // 결과 표시
+            const percentage = (score / vocabularyData.length) * 100;
+            scoreDisplay.textContent = `${score}/${vocabularyData.length}`;
+            
+            let message = "";
+            if (percentage >= 90) {
+                message = "훌륭합니다! 한국어 실력이 뛰어나시네요!";
+            } else if (percentage >= 70) {
+                message = "잘 하셨습니다! 한국어 단어를 잘 알고 계시네요.";
+            } else if (percentage >= 50) {
+                message = "좋은 성적입니다. 조금 더 공부하면 더 잘할 수 있어요!";
+            } else {
+                message = "조금 더 공부가 필요해요. 포기하지 마시고 계속 도전하세요!";
+            }
+            
+            resultsMessage.textContent = message;
+            resultsContainer.style.display = 'block';
+            
+            // 결과로 스크롤 이동
+            resultsContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 퀴즈 재시작
+        function restartQuiz() {
+            // 상태 초기화
+            currentQuestion = 0;
+            userAnswers = new Array(vocabularyData.length).fill(null);
+            quizSubmitted = false;
+            
+            // 퀴즈 카드 초기화
+            document.querySelectorAll('.quiz-card').forEach((card, index) => {
+                card.style.display = index === 0 ? 'block' : 'none';
+                
+                // 옵션 초기화
+                card.querySelectorAll('.option').forEach(opt => {
+                    opt.className = 'option';
+                });
+                
+                // 피드백 숨기기
+                const feedback = document.getElementById(`feedback-${index}`);
+                feedback.style.display = 'none';
+                feedback.className = 'answer-feedback';
+            });
+            
+            // 결과 숨기기
+            resultsContainer.style.display = 'none';
+            
+            // 버튼 상태 업데이트
+            updateButtonStates();
+            
+            // 상단으로 스크롤 이동
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 다크 모드 전환
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            
+            // 버튼 텍스트 및 아이콘 변경
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            themeToggle.innerHTML = isDarkMode 
+                ? '<i class="fas fa-sun"></i> 라이트 모드' 
+                : '<i class="fas fa-moon"></i> 다크 모드';
+        }
+
+        // 이벤트 리스너 등록
+        prevBtn.addEventListener('click', () => goToQuestion(currentQuestion - 1));
+        nextBtn.addEventListener('click', () => goToQuestion(currentQuestion + 1));
+        submitBtn.addEventListener('click', submitQuiz);
+        themeToggle.addEventListener('click', toggleDarkMode);
+        restartBtn.addEventListener('click', restartQuiz);
+
+        // 퀴즈 초기화
+        initQuiz();
+    </script>
+</body>
+</html>
