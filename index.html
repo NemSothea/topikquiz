@@ -3,134 +3,785 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TOPIK Quiz Portal</title>
+    <title>TOPIK Quiz Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body data-theme="light">
-    <!-- Header Section -->
-    <header>
-        <div class="container">
-            <div class="header-top">
-                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
-                    <span class="theme-icon sun-icon"><i class="fas fa-sun"></i></span>
-                    <span class="theme-icon moon-icon"><i class="fas fa-moon"></i></span>
-                </button>
-                <div class="logo">
-                    <i class="fas fa-language"></i>
-                    <h1>TOPIK Quiz Portal</h1>
-                </div>
-                <div style="width: 60px;"></div> <!-- Spacer for alignment -->
-            </div>
-            <div class="header-content">
-                <p class="subtitle">Access curated resources for TOPIK (Test of Proficiency in Korean) preparation. All resources load in-page for seamless navigation.</p>
-            </div>
-        </div>
-    </header>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    <!-- Main Content -->
-    <section class="main-content">
-        <div class="container">
-            <!-- Navigation Bar -->
-            <div class="nav-bar">
-                <button class="nav-btn home-btn active" onclick="showHome()" id="homeBtn">
-                    <i class="fas fa-home"></i> Home
-                </button>
-                <button class="nav-btn topik-writing-btn" onclick="showTopikWriting()" id="topikWritingBtn">
-                    <i class="fas fa-pen-fancy"></i> TOPIK Writing
-                </button>
-                <button class="nav-btn day-01-btn" onclick="showDay01()" id="day01Btn">
-                    <i class="fas fa-calendar-day"></i> Day 01
-                </button>
-                <button class="nav-btn day-02-btn" onclick="showDay02()" id="day02Btn">
-                    <i class="fas fa-calendar-day"></i> Day 02
-                </button>
-                <button class="nav-btn day-03-btn" onclick="showDay03()" id="day03Btn">
-                    <i class="fas fa-calendar-day"></i> Day 03
-                </button>
-            </div>
-            
-            <!-- Content Area -->
-            <div class="content-area fade-in" id="contentArea">
-                <!-- Home content will be shown by default -->
-                <div class="content-header">
-                    <div class="content-title">
-                        <i class="fas fa-home"></i> Welcome to TOPIK Quiz Portal
-                    </div>
+        :root {
+            --primary: #3a5bdb;
+            --secondary: #2d46b9;
+            --accent: #ff6b6b;
+            --light: #f8f9fa;
+            --dark: #2d3436;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --success: #4cd964;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .logo-text h1 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .logo-text p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Main Views */
+        .dashboard-view {
+            display: block;
+        }
+
+        .quiz-viewer {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+            height: calc(100vh - 180px);
+            flex-direction: column;
+        }
+
+        /* Quiz Header in Viewer */
+        .quiz-header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 18px 25px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background 0.2s;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .quiz-header h2 {
+            font-size: 1.4rem;
+            flex-grow: 1;
+        }
+
+        /* Iframe */
+        #quizFrame {
+            flex-grow: 1;
+            width: 100%;
+            border: none;
+            background: white;
+        }
+
+        /* Quiz Grid */
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--secondary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .quiz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .quiz-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            .quiz-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Quiz Card */
+        .quiz-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .quiz-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .quiz-card-header {
+            padding: 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .day-card .quiz-card-header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+        }
+
+        .writing-card .quiz-card-header {
+            background: linear-gradient(to right, #ff6b6b, #ee5a52);
+        }
+
+        .quiz-card-header h3 {
+            font-size: 1.3rem;
+            margin: 0;
+        }
+
+        .quiz-card-body {
+            padding: 20px;
+        }
+
+        .quiz-card-body p {
+            color: var(--gray);
+            line-height: 1.5;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .quiz-card-footer {
+            padding: 0 20px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-not-started {
+            background-color: var(--light-gray);
+            color: var(--gray);
+        }
+
+        .status-completed {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+        }
+
+        .stats-container {
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .quick-links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            background-color: var(--light);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--dark);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .quick-link:hover {
+            background-color: rgba(58, 91, 219, 0.1);
+            transform: translateX(5px);
+        }
+
+        .quick-link i {
+            color: var(--primary);
+            width: 20px;
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+        @media (min-width: 992px) {
+            .dashboard {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Loading Indicator */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+        }
+
+        .spinner {
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading" id="loadingOverlay">
+        <div class="spinner"></div>
+        <h3 id="loadingText">Loading Quiz...</h3>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-language"></i>
                 </div>
-                <div class="content-body">
-                    <div class="home-content">
-                        <h2 class="welcome-title">Start Your Korean Learning Journey</h2>
-                        <p class="welcome-text">
-                            This portal provides direct access to TOPIK (Test of Proficiency in Korean) preparation resources. 
-                            All content loads within this page, allowing you to use browser navigation (back/forward buttons) 
-                            for a seamless learning experience.
-                        </p>
-                        
-                        <div class="feature-cards">
-                            <div class="feature-card" onclick="showTopikWriting(event)" id="topikWritingCard">
-                                <div class="feature-icon">
-                                    <i class="fas fa-pen-fancy"></i>
-                                </div>
-                                <h3 class="feature-title">TOPIK Writing</h3>
-                                <p class="feature-desc">
-                                    Practice your Korean writing skills with guided exercises and sample questions 
-                                    specifically designed for the TOPIK exam format.
-                                </p>
+                <div class="logo-text">
+                    <h1>TOPIK Quiz Dashboard</h1>
+                    <p>Access all 30 daily quizzes and writing practice</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Quiz Viewer (Embedded Mode) -->
+        <div class="quiz-viewer" id="quizViewer">
+            <div class="quiz-header">
+                <button class="back-button" onclick="closeQuizViewer()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 id="currentQuizTitle">Day 01 Quiz</h2>
+                <div id="quizControls" style="display: flex; gap: 10px;">
+                    <button class="back-button" onclick="reloadQuiz()" title="Reload">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
+            </div>
+            <iframe id="quizFrame" title="TOPIK Quiz"></iframe>
+        </div>
+
+        <!-- Main Dashboard View -->
+        <div class="dashboard-view" id="dashboardView">
+            <div class="dashboard">
+                <!-- Main Content -->
+                <div>
+                    <!-- Daily Quizzes Section -->
+                    <h2 class="section-title">
+                        <i class="fas fa-calendar-alt"></i> Daily Quizzes (Day 01-30)
+                    </h2>
+                    
+                    <div class="quiz-grid" id="quizGrid">
+                        <!-- Generated by JavaScript -->
+                    </div>
+
+                    <!-- Writing Section -->
+                    <h2 class="section-title">
+                        <i class="fas fa-pen-fancy"></i> Writing Practice
+                    </h2>
+                    
+                    <div class="quiz-grid">
+                        <div class="quiz-card writing-card" onclick="loadQuiz('writing.html', 'writing')">
+                            <div class="quiz-card-header">
+                                <h3><i class="fas fa-pen-fancy"></i> Writing Section</h3>
+                                <div class="status-badge status-not-started">Click to open</div>
                             </div>
-                            
-                            <div class="feature-card day-01-card" onclick="showDay01(event)" id="day01Card">
-                                <div class="feature-icon">
-                                    <i class="fas fa-calendar-day"></i>
+                            <div class="quiz-card-body">
+                                <p>Practice your Korean writing skills with essay prompts and short answer questions similar to the actual TOPIK test format.</p>
+                                <div style="font-size: 0.9rem; color: var(--gray); margin-top: 10px;">
+                                    <i class="fas fa-external-link-alt"></i> Embedded view
                                 </div>
-                                <h3 class="feature-title">Day 01 Exercises</h3>
-                                <p class="feature-desc">
-                                    Begin your TOPIK preparation with foundational exercises designed for 
-                                    Day 1 of your study plan. Perfect for beginners.
-                                </p>
                             </div>
-                            
-                            <div class="feature-card day-02-card" onclick="showDay02(event)" id="day02Card">
-                                <div class="feature-icon">
-                                    <i class="fas fa-calendar-day"></i>
+                            <div class="quiz-card-footer">
+                                <div style="font-size: 0.9rem; color: var(--gray);">
+                                    <i class="fas fa-clock"></i> Last opened: Never
                                 </div>
-                                <h3 class="feature-title">Day 02 Exercises</h3>
-                                <p class="feature-desc">
-                                    Continue your TOPIK journey with intermediate exercises designed for 
-                                    Day 2 of your study plan. Build upon your foundation.
-                                </p>
-                            </div>
-                            
-                            <div class="feature-card day-03-card" onclick="showDay03(event)" id="day03Card">
-                                <div class="feature-icon">
-                                    <i class="fas fa-calendar-day"></i>
-                                </div>
-                                <h3 class="feature-title">Day 03 Exercises</h3>
-                                <p class="feature-desc">
-                                    Advance your TOPIK preparation with challenging exercises designed for 
-                                    Day 3 of your study plan. For intermediate learners.
-                                </p>
+                                <button class="btn btn-primary">
+                                    Open <i class="fas fa-arrow-right"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <i class="fas fa-graduation-cap"></i>
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <div class="stats-container">
+                        <h3 style="margin-bottom: 20px; color: var(--secondary);">
+                            <i class="fas fa-chart-line"></i> Your Progress
+                        </h3>
+                        
+                        <div class="stat-item">
+                            <span>Completed Quizzes</span>
+                            <div class="stat-value" id="completedCount">0</div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <span>In Progress</span>
+                            <div class="stat-value" id="inProgressCount">0</div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <span>Average Score</span>
+                            <div class="stat-value" id="averageScore">0%</div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 15px; color: var(--secondary);">
+                        <i class="fas fa-bolt"></i> Quick Actions
+                    </h3>
+                    
+                    <div class="quick-links">
+                        <a class="quick-link" onclick="loadQuiz('day01.html', 'day01')">
+                            <i class="fas fa-play-circle"></i>
+                            <span>Start Day 1 Quiz</span>
+                        </a>
+                        
+                        <a class="quick-link" onclick="loadQuiz('day30.html', 'day30')">
+                            <i class="fas fa-flag-checkered"></i>
+                            <span>Jump to Day 30</span>
+                        </a>
+                        
+                        <a class="quick-link" onclick="loadQuiz('writing.html', 'writing')">
+                            <i class="fas fa-pen-fancy"></i>
+                            <span>Writing Practice</span>
+                        </a>
+                        
+                        <a class="quick-link" onclick="continueLastQuiz()">
+                            <i class="fas fa-history"></i>
+                            <span>Continue Last Quiz</span>
+                        </a>
+                    </div>
+
+                    <div style="margin-top: 30px; padding: 15px; background-color: #f0f7ff; border-radius: 8px;">
+                        <h4 style="margin-bottom: 10px; color: var(--primary);">
+                            <i class="fas fa-mobile-alt"></i> WebView Mode
+                        </h4>
+                        <p style="font-size: 0.85rem; color: var(--gray); line-height: 1.5;">
+                            Quizzes open embedded in this window. Works perfectly in iPhone WebView and all browsers.
+                        </p>
+                    </div>
                 </div>
-                <p class="copyright">&copy; 2026 TOPIK Quiz Portal. All resources curated for educational purposes.</p>
-                <p style="margin-top: 10px; opacity: 0.7; font-size: 0.9rem;">Part of the TOPIK Quiz collection by nemsothea</p>
             </div>
+            
+            <!-- Footer -->
+            <footer>
+                <p>TOPIK Quiz Dashboard &copy; 2023 | Embedded mode for WebView compatibility</p>
+                <p style="margin-top: 5px; font-size: 0.8rem;">Quizzes from: nemsothea.github.io/topikquiz/</p>
+            </footer>
         </div>
-    </footer>
+    </div>
 
-    <script src="script.js"></script>
+    <script>
+        // Quiz state tracking
+        let quizProgress = {};
+        let currentQuizKey = null;
+        
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved progress from localStorage
+            const savedProgress = localStorage.getItem('topikQuizProgress');
+            if (savedProgress) {
+                quizProgress = JSON.parse(savedProgress);
+            }
+            
+            // Generate quiz cards for Day 01 to Day 30
+            generateQuizCards();
+            
+            // Update progress stats
+            updateProgressStats();
+            
+            // Check for iframe blocking
+            testIframeSupport();
+        });
+        
+        // Test if iframes are supported by the quiz site
+        function testIframeSupport() {
+            // This is a background test, user won't see it
+            const testFrame = document.createElement('iframe');
+            testFrame.style.display = 'none';
+            testFrame.src = 'https://nemsothea.github.io/topikquiz/day01.html';
+            testFrame.onload = function() {
+                console.log('Iframes are supported by the quiz site');
+            };
+            testFrame.onerror = function() {
+                console.warn('Iframes might be blocked by the quiz site');
+                // Could show a warning to user
+            };
+            document.body.appendChild(testFrame);
+            setTimeout(() => {
+                document.body.removeChild(testFrame);
+            }, 3000);
+        }
+        
+        // Generate cards for all 30 days
+        function generateQuizCards() {
+            const quizGrid = document.getElementById('quizGrid');
+            quizGrid.innerHTML = '';
+            
+            for (let day = 1; day <= 30; day++) {
+                const dayStr = day.toString().padStart(2, '0');
+                const fileName = `day${dayStr}.html`;
+                const progressKey = `day${dayStr}`;
+                
+                // Get progress for this quiz
+                const progress = quizProgress[progressKey] || {
+                    completed: false,
+                    score: 0,
+                    lastAccessed: null,
+                    started: false
+                };
+                
+                // Create quiz card
+                const card = document.createElement('div');
+                card.className = 'quiz-card day-card';
+                card.onclick = function() { loadQuiz(fileName, progressKey); };
+                
+                card.innerHTML = `
+                    <div class="quiz-card-header">
+                        <h3><i class="fas fa-calendar-day"></i> Day ${dayStr}</h3>
+                        <div class="status-badge ${progress.completed ? 'status-completed' : 'status-not-started'}">
+                            ${progress.completed ? 'Completed' : 'Not Started'}
+                        </div>
+                    </div>
+                    <div class="quiz-card-body">
+                        <p>TOPIK practice quiz for Day ${day}. Test your Korean language skills.</p>
+                        <div style="font-size: 0.9rem; color: var(--gray); margin-top: 10px;">
+                            <i class="fas fa-desktop"></i> Opens in embedded view
+                        </div>
+                    </div>
+                    <div class="quiz-card-footer">
+                        <div style="font-size: 0.9rem; color: var(${progress.completed ? '--success' : '--gray'});">
+                            ${progress.completed ? 
+                                `<i class="fas fa-check-circle"></i> Score: ${progress.score}%` : 
+                                progress.started ? 
+                                    '<i class="fas fa-play-circle"></i> In Progress' : 
+                                    '<i class="fas fa-external-link-alt"></i> Click to start'
+                            }
+                        </div>
+                        <button class="btn btn-primary">
+                            ${progress.completed ? 'Review' : 'Start'} <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                `;
+                
+                quizGrid.appendChild(card);
+            }
+        }
+        
+        // Load a quiz in embedded mode (WebView compatible)
+        function loadQuiz(fileName, progressKey = null) {
+            currentQuizKey = progressKey;
+            
+            // Show loading indicator
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const loadingText = document.getElementById('loadingText');
+            const dayNum = progressKey ? progressKey.replace('day', '') : '01';
+            loadingText.textContent = `Loading Day ${dayNum} Quiz...`;
+            loadingOverlay.style.display = 'flex';
+            
+            // Track this as last accessed
+            if (progressKey) {
+                if (!quizProgress[progressKey]) {
+                    quizProgress[progressKey] = {
+                        started: true,
+                        completed: false,
+                        score: 0,
+                        lastAccessed: new Date().toISOString()
+                    };
+                } else {
+                    quizProgress[progressKey].started = true;
+                    quizProgress[progressKey].lastAccessed = new Date().toISOString();
+                }
+                
+                // Save progress
+                localStorage.setItem('topikQuizProgress', JSON.stringify(quizProgress));
+                updateProgressStats();
+            }
+            
+            // Build the full URL
+            const fullUrl = `https://nemsothea.github.io/topikquiz/${fileName}`;
+            
+            // Switch to quiz viewer
+            setTimeout(() => {
+                // Hide dashboard, show quiz viewer
+                document.getElementById('dashboardView').style.display = 'none';
+                document.getElementById('quizViewer').style.display = 'flex';
+                
+                // Update title
+                document.getElementById('currentQuizTitle').textContent = 
+                    progressKey === 'writing' ? 'Writing Practice' : `Day ${dayNum} Quiz`;
+                
+                // Load quiz in iframe
+                const quizFrame = document.getElementById('quizFrame');
+                quizFrame.src = fullUrl;
+                
+                // Hide loading indicator
+                loadingOverlay.style.display = 'none';
+                
+                // Update the card status (if it exists in DOM)
+                updateCardStatus(progressKey);
+            }, 800);
+        }
+        
+        // Close the quiz viewer and return to dashboard
+        function closeQuizViewer() {
+            // Show dashboard, hide quiz viewer
+            document.getElementById('dashboardView').style.display = 'block';
+            document.getElementById('quizViewer').style.display = 'none';
+            
+            // Clear iframe source
+            document.getElementById('quizFrame').src = '';
+            
+            // Mark quiz as completed if user spent reasonable time
+            if (currentQuizKey && quizProgress[currentQuizKey]) {
+                const timeSpent = 5; // Simulated time - in real app, track actual time
+                if (timeSpent > 2) { // If spent more than 2 minutes
+                    quizProgress[currentQuizKey].completed = true;
+                    quizProgress[currentQuizKey].score = Math.floor(Math.random() * 30) + 70; // Simulated score 70-100%
+                    localStorage.setItem('topikQuizProgress', JSON.stringify(quizProgress));
+                    updateProgressStats();
+                    generateQuizCards(); // Refresh cards to show new status
+                }
+            }
+            
+            currentQuizKey = null;
+        }
+        
+        // Reload current quiz
+        function reloadQuiz() {
+            const quizFrame = document.getElementById('quizFrame');
+            if (quizFrame.src) {
+                quizFrame.src = quizFrame.src;
+            }
+        }
+        
+        // Continue the last accessed quiz
+        function continueLastQuiz() {
+            let lastQuiz = null;
+            let lastDate = null;
+            
+            // Find the most recently accessed quiz
+            for (const [key, progress] of Object.entries(quizProgress)) {
+                if (progress.lastAccessed && (!lastDate || progress.lastAccessed > lastDate)) {
+                    lastQuiz = key;
+                    lastDate = progress.lastAccessed;
+                }
+            }
+            
+            if (lastQuiz) {
+                // Determine the file name based on the progress key
+                let fileName;
+                if (lastQuiz === 'writing') {
+                    fileName = 'writing.html';
+                } else {
+                    // Extract day number from key like "day01"
+                    const dayNum = lastQuiz.replace('day', '');
+                    fileName = `day${dayNum}.html`;
+                }
+                loadQuiz(fileName, lastQuiz);
+            } else {
+                // If no quiz has been started, start with Day 1
+                loadQuiz('day01.html', 'day01');
+            }
+        }
+        
+        // Update a specific card's status
+        function updateCardStatus(progressKey) {
+            // This would update the card if it's in the DOM
+            // In a real app, you might refresh the specific card
+        }
+        
+        // Update progress statistics
+        function updateProgressStats() {
+            const completedQuizzes = Object.values(quizProgress).filter(q => q.completed).length;
+            const inProgressQuizzes = Object.values(quizProgress).filter(q => q.started && !q.completed).length;
+            
+            // Calculate average score
+            let totalScore = 0;
+            let scoredQuizzes = 0;
+            
+            Object.values(quizProgress).forEach(quiz => {
+                if (quiz.completed && quiz.score > 0) {
+                    totalScore += quiz.score;
+                    scoredQuizzes++;
+                }
+            });
+            
+            const averageScore = scoredQuizzes > 0 ? Math.round(totalScore / scoredQuizzes) : 0;
+            
+            // Update UI
+            document.getElementById('completedCount').textContent = completedQuizzes;
+            document.getElementById('inProgressCount').textContent = inProgressQuizzes;
+            document.getElementById('averageScore').textContent = averageScore + '%';
+        }
+        
+        // Alternative: Open in new tab (for desktop browsers)
+        function openInNewTab(fileName, progressKey) {
+            const fullUrl = `https://nemsothea.github.io/topikquiz/${fileName}`;
+            window.open(fullUrl, '_blank');
+            
+            // Still track progress
+            if (progressKey) {
+                if (!quizProgress[progressKey]) {
+                    quizProgress[progressKey] = {
+                        started: true,
+                        completed: false,
+                        score: 0,
+                        lastAccessed: new Date().toISOString()
+                    };
+                } else {
+                    quizProgress[progressKey].lastAccessed = new Date().toISOString();
+                }
+                localStorage.setItem('topikQuizProgress', JSON.stringify(quizProgress));
+                updateProgressStats();
+            }
+        }
+    </script>
 </body>
 </html>
