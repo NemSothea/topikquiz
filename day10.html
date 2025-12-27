@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Korean Vocabulary Quiz with SRS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary-color: #10b981;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f9fafb;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --correct-color: #10b981;
+            --incorrect-color: #ef4444;
+            --selected-color: #4f46e5;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 1rem;
+            --spacing-md: 1.5rem;
+            --spacing-lg: 2rem;
+            --spacing-xl: 3rem;
+            --border-radius: 0.75rem;
+        }
+
+        .dark-mode {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary-color: #10b981;
+            --text-color: #f9fafb;
+            --text-light: #d1d5db;
+            --bg-color: #111827;
+            --card-bg: #1f2937;
+            --border-color: #374151;
+            --selected-color: #6366f1;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            padding: var(--spacing-md);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 2.25rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        h1 i {
+            font-size: 2rem;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+        }
+
+        .btn-icon {
+            padding: 0.75rem;
+            aspect-ratio: 1;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-xl);
+        }
+
+        @media (max-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .quiz-section, .stats-section {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: var(--spacing-lg);
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+        }
+
+        .progress-container {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .progress-bar {
+            height: 0.75rem;
+            background-color: var(--border-color);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 9999px;
+            transition: width 0.5s ease;
+        }
+
+        .word-display {
+            background-color: var(--bg-color);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .korean-word {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .word-type {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .option-btn {
+            padding: var(--spacing-md);
+            text-align: left;
+            border: 2px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-radius: var(--border-radius);
+            font-size: 1.125rem;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        /* Selected option style */
+        .option-btn.selected {
+            border-color: var(--selected-color);
+            background-color: rgba(79, 70, 229, 0.1);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .dark-mode .option-btn.selected {
+            background-color: rgba(99, 102, 241, 0.2);
+        }
+
+        .option-btn.correct {
+            border-color: var(--correct-color);
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--correct-color);
+        }
+
+        .option-btn.incorrect {
+            border-color: var(--incorrect-color);
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--incorrect-color);
+        }
+
+        .feedback {
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-lg);
+            display: none;
+        }
+
+        .feedback.correct {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--correct-color);
+            color: var(--correct-color);
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--incorrect-color);
+            color: var(--incorrect-color);
+            display: block;
+        }
+
+        .srs-info {
+            background-color: var(--bg-color);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+            box-shadow: var(--shadow);
+        }
+
+        .srs-info h3 {
+            margin-bottom: var(--spacing-sm);
+            color: var(--primary-color);
+        }
+
+        .srs-info ul {
+            padding-left: var(--spacing-lg);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .stat-card {
+            background-color: var(--bg-color);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-md);
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-top: var(--spacing-xs);
+        }
+
+        .word-list {
+            margin-top: var(--spacing-lg);
+        }
+
+        .word-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .word-item:last-child {
+            border-bottom: none;
+        }
+
+        .word-item-korean {
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .word-item-meaning {
+            color: var(--text-light);
+        }
+
+        .word-item-level {
+            display: inline-block;
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 50%;
+            margin-left: var(--spacing-sm);
+        }
+
+        .level-0 { background-color: var(--incorrect-color); }
+        .level-1 { background-color: #f59e0b; }
+        .level-2 { background-color: #10b981; }
+        .level-3 { background-color: #3b82f6; }
+        .level-4 { background-color: #8b5cf6; }
+
+        .hidden {
+            display: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--spacing-md);
+            }
+            
+            .header-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .korean-word {
+                font-size: 2.25rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: var(--spacing-sm);
+            }
+            
+            .quiz-section, .stats-section {
+                padding: var(--spacing-md);
+            }
+            
+            h1 {
+                font-size: 1.75rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: var(--spacing-sm);
+            }
+            
+            .controls button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-language"></i> Korean Vocabulary Quiz</h1>
+            <div class="header-controls">
+                <button class="btn-secondary btn-icon" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="btn-primary" id="resetProgress">
+                    <i class="fas fa-redo"></i> Reset Progress
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="quiz-section">
+                <h2 class="section-title"><i class="fas fa-question-circle"></i> Word Quiz</h2>
+                
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Progress</span>
+                        <span id="progressText">0/15</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="word-display">
+                    <div class="word-type" id="wordType">Verb</div>
+                    <div class="korean-word" id="koreanWord">지원하다</div>
+                    <div class="word-meaning" id="wordMeaning">What is the English meaning of this word?</div>
+                </div>
+
+                <div class="options-container" id="optionsContainer">
+                    <!-- Options will be generated by JavaScript -->
+                </div>
+
+                <div class="feedback" id="feedback">
+                    <!-- Feedback will be shown here -->
+                </div>
+
+                <div class="controls">
+                    <button class="btn-secondary" id="hintBtn">
+                        <i class="fas fa-lightbulb"></i> Show Hint
+                    </button>
+                    <button class="btn-primary" id="nextBtn" disabled>
+                        <i class="fas fa-arrow-right"></i> Next Word
+                    </button>
+                </div>
+
+                <div class="srs-info">
+                    <h3><i class="fas fa-brain"></i> Spaced Repetition System (SRS)</h3>
+                    <p>This quiz uses SRS principles to optimize your learning:</p>
+                    <ul>
+                        <li>Words you know well appear less frequently</li>
+                        <li>Words you struggle with appear more often</li>
+                        <li>Each word has a mastery level from 0-4</li>
+                    </ul>
+                    <p id="nextReviewInfo">Next review for this word: <strong>Soon</strong></p>
+                </div>
+            </section>
+
+            <section class="stats-section">
+                <h2 class="section-title"><i class="fas fa-chart-bar"></i> Learning Stats</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalWords">15</div>
+                        <div class="stat-label">Total Words</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="masteredWords">0</div>
+                        <div class="stat-label">Mastered</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="correctAnswers">0</div>
+                        <div class="stat-label">Correct Answers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="accuracy">0%</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                </div>
+
+                <h3 class="section-title"><i class="fas fa-list-ul"></i> Word List with Mastery Levels</h3>
+                <div class="word-list" id="wordList">
+                    <!-- Word list will be generated by JavaScript -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Complete vocabulary list with 15 words
+        const allWords = [
+            { korean: "지원하다", meaning: "Support", type: "Verb" },
+            { korean: "소홀하다", meaning: "Neglect", type: "Verb" },
+            { korean: "의심하다", meaning: "Doubt(Hesitation)", type: "Verb" },
+            { korean: "장식하다", meaning: "Decorate", type: "Verb" },
+            { korean: "행사", meaning: "Event", type: "Noun" },
+            { korean: "생기다", meaning: "Happen", type: "Verb" },
+            { korean: "반영하다", meaning: "Reflect", type: "Verb" },
+            { korean: "사고", meaning: "Accident", type: "Noun" },
+            { korean: "책임", meaning: "Responsibility", type: "Noun" },
+            { korean: "답답하다", meaning: "Frustrated", type: "Adjective" },
+            { korean: "무료하다", meaning: "Boring", type: "Adjective" },
+            { korean: "회복하다", meaning: "Recover", type: "Verb" },
+            { korean: "상승하다", meaning: "Rise", type: "Verb" },
+            { korean: "안정되다", meaning: "Stabilize", type: "Verb" },
+            { korean: "능력", meaning: "Ability", type: "Noun" }
+        ];
+
+        // SRS Implementation
+        class SpacedRepetitionSystem {
+            constructor() {
+                // Load progress from localStorage or initialize
+                this.progress = JSON.parse(localStorage.getItem('koreanQuizProgress')) || this.initializeProgress();
+                this.currentWordIndex = 0;
+                this.nextReviewTimes = this.calculateNextReviewTimes();
+            }
+            
+            initializeProgress() {
+                // Each word starts at level 0 (not learned)
+                // Levels: 0 = New, 1 = Learning, 2 = Known, 3 = Well Known, 4 = Mastered
+                return allWords.map(word => ({
+                    korean: word.korean,
+                    level: 0,
+                    correct: 0,
+                    incorrect: 0,
+                    lastReviewed: null,
+                    nextReview: Date.now() // Review immediately
+                }));
+            }
+            
+            calculateNextReviewTimes() {
+                // Based on SRS principles, calculate when each word should be reviewed next
+                // Interval increases with mastery level
+                const intervals = [
+                    0,      // Level 0: Review immediately
+                    1000 * 60 * 60 * 2,    // Level 1: 2 hours
+                    1000 * 60 * 60 * 24,   // Level 2: 1 day
+                    1000 * 60 * 60 * 24 * 3, // Level 3: 3 days
+                    1000 * 60 * 60 * 24 * 7  // Level 4: 1 week
+                ];
+                
+                return this.progress.map(item => {
+                    if (item.level === 0) return 0;
+                    return item.lastReviewed ? item.lastReviewed + intervals[item.level] : Date.now();
+                });
+            }
+            
+            getNextWord() {
+                // Prioritize words that need review based on SRS algorithm
+                const now = Date.now();
+                
+                // Find words that are due for review
+                const dueForReview = this.progress
+                    .map((item, index) => ({...item, index}))
+                    .filter(item => now >= this.nextReviewTimes[item.index] || item.level === 0)
+                    .sort((a, b) => a.level - b.level); // Lower levels first
+                
+                if (dueForReview.length > 0) {
+                    // Return a word due for review
+                    return dueForReview[0].index;
+                }
+                
+                // If no words are due, return the word with the lowest level
+                let minLevel = 5;
+                let minLevelIndex = 0;
+                
+                for (let i = 0; i < this.progress.length; i++) {
+                    if (this.progress[i].level < minLevel) {
+                        minLevel = this.progress[i].level;
+                        minLevelIndex = i;
+                    }
+                }
+                
+                return minLevelIndex;
+            }
+            
+            updateProgress(wordIndex, isCorrect) {
+                const wordProgress = this.progress[wordIndex];
+                
+                if (isCorrect) {
+                    wordProgress.correct++;
+                    // Increase level on correct answer, but don't exceed 4
+                    if (wordProgress.level < 4) {
+                        wordProgress.level++;
+                    }
+                } else {
+                    wordProgress.incorrect++;
+                    // Decrease level on incorrect answer, but not below 0
+                    if (wordProgress.level > 0) {
+                        wordProgress.level--;
+                    }
+                }
+                
+                wordProgress.lastReviewed = Date.now();
+                this.nextReviewTimes[wordIndex] = this.calculateNextReviewTime(wordProgress.level);
+                
+                // Save to localStorage
+                this.saveProgress();
+                
+                return wordProgress;
+            }
+            
+            calculateNextReviewTime(level) {
+                const now = Date.now();
+                const intervals = [
+                    0,      // Level 0
+                    1000 * 60 * 60 * 2,    // Level 1: 2 hours
+                    1000 * 60 * 60 * 24,   // Level 2: 1 day
+                    1000 * 60 * 60 * 24 * 3, // Level 3: 3 days
+                    1000 * 60 * 60 * 24 * 7  // Level 4: 1 week
+                ];
+                
+                return now + intervals[level];
+            }
+            
+            saveProgress() {
+                localStorage.setItem('koreanQuizProgress', JSON.stringify(this.progress));
+            }
+            
+            resetProgress() {
+                this.progress = this.initializeProgress();
+                this.nextReviewTimes = this.calculateNextReviewTimes();
+                this.saveProgress();
+                return this.progress;
+            }
+            
+            getStats() {
+                const total = this.progress.length;
+                const mastered = this.progress.filter(word => word.level === 4).length;
+                const correct = this.progress.reduce((sum, word) => sum + word.correct, 0);
+                const incorrect = this.progress.reduce((sum, word) => sum + word.incorrect, 0);
+                const totalAttempts = correct + incorrect;
+                const accuracy = totalAttempts > 0 ? Math.round((correct / totalAttempts) * 100) : 0;
+                
+                return {
+                    total,
+                    mastered,
+                    correct,
+                    incorrect,
+                    accuracy
+                };
+            }
+        }
+
+        // Quiz Application
+        class VocabularyQuiz {
+            constructor() {
+                this.srs = new SpacedRepetitionSystem();
+                this.currentWordIndex = 0;
+                this.quizState = 'question'; // 'question', 'feedback'
+                this.selectedOption = null;
+                this.options = [];
+                this.initializeQuiz();
+                this.setupEventListeners();
+                this.updateDisplay();
+                this.updateStats();
+                this.updateWordList();
+            }
+            
+            initializeQuiz() {
+                this.currentWordIndex = this.srs.getNextWord();
+                this.generateOptions();
+            }
+            
+            generateOptions() {
+                const currentWord = allWords[this.currentWordIndex];
+                const correctAnswer = currentWord.meaning;
+                
+                // Get 3 random incorrect answers from other words
+                let incorrectOptions = allWords
+                    .filter(word => word.meaning !== correctAnswer)
+                    .map(word => word.meaning);
+                
+                // Shuffle and take 3
+                incorrectOptions = this.shuffleArray(incorrectOptions).slice(0, 3);
+                
+                // Combine correct and incorrect options
+                this.options = [correctAnswer, ...incorrectOptions];
+                this.options = this.shuffleArray(this.options);
+            }
+            
+            shuffleArray(array) {
+                const newArray = [...array];
+                for (let i = newArray.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+                }
+                return newArray;
+            }
+            
+            showQuestion() {
+                const currentWord = allWords[this.currentWordIndex];
+                const wordProgress = this.srs.progress[this.currentWordIndex];
+                
+                // Update Korean word display
+                document.getElementById('koreanWord').textContent = currentWord.korean;
+                document.getElementById('wordType').textContent = currentWord.type;
+                document.getElementById('wordMeaning').textContent = "What is the English meaning of this word?";
+                
+                // Update progress
+                const progressText = `${this.currentWordIndex + 1}/${allWords.length}`;
+                document.getElementById('progressText').textContent = progressText;
+                const progressPercent = ((this.currentWordIndex + 1) / allWords.length) * 100;
+                document.getElementById('progressFill').style.width = `${progressPercent}%`;
+                
+                // Generate option buttons
+                const optionsContainer = document.getElementById('optionsContainer');
+                optionsContainer.innerHTML = '';
+                
+                this.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.className = 'option-btn';
+                    button.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+                    button.dataset.optionIndex = index;
+                    button.dataset.meaning = option;
+                    button.addEventListener('click', () => this.selectOption(button));
+                    optionsContainer.appendChild(button);
+                });
+                
+                // Reset feedback and buttons
+                document.getElementById('feedback').className = 'feedback';
+                document.getElementById('feedback').textContent = '';
+                document.getElementById('nextBtn').disabled = true;
+                document.getElementById('hintBtn').disabled = false;
+                document.getElementById('nextBtn').innerHTML = '<i class="fas fa-arrow-right"></i> Next Word';
+                
+                // Update SRS info
+                const nextReviewTime = this.srs.nextReviewTimes[this.currentWordIndex];
+                const now = Date.now();
+                const timeUntilReview = nextReviewTime - now;
+                
+                let reviewText = "Soon";
+                if (timeUntilReview <= 0) {
+                    reviewText = "Now";
+                } else if (timeUntilReview < 1000 * 60 * 60) {
+                    reviewText = "In less than an hour";
+                } else if (timeUntilReview < 1000 * 60 * 60 * 24) {
+                    const hours = Math.floor(timeUntilReview / (1000 * 60 * 60));
+                    reviewText = `In ${hours} hour${hours !== 1 ? 's' : ''}`;
+                } else {
+                    const days = Math.floor(timeUntilReview / (1000 * 60 * 60 * 24));
+                    reviewText = `In ${days} day${days !== 1 ? 's' : ''}`;
+                }
+                
+                document.getElementById('nextReviewInfo').innerHTML = `Next review for this word: <strong>${reviewText}</strong>`;
+                
+                this.quizState = 'question';
+                this.selectedOption = null;
+            }
+            
+            selectOption(optionButton) {
+                if (this.quizState !== 'question') return;
+                
+                // Remove previous selection
+                document.querySelectorAll('.option-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                
+                // Mark selected option
+                optionButton.classList.add('selected');
+                this.selectedOption = optionButton;
+                
+                // Enable next button and change text to "Check Answer"
+                document.getElementById('nextBtn').disabled = false;
+                document.getElementById('nextBtn').innerHTML = '<i class="fas fa-check"></i> Check Answer';
+            }
+            
+            checkAnswer() {
+                if (!this.selectedOption || this.quizState !== 'question') return;
+                
+                const currentWord = allWords[this.currentWordIndex];
+                const selectedMeaning = this.selectedOption.dataset.meaning;
+                const isCorrect = selectedMeaning === currentWord.meaning;
+                
+                // Update SRS progress
+                const wordProgress = this.srs.updateProgress(this.currentWordIndex, isCorrect);
+                
+                // Show feedback
+                const feedbackElement = document.getElementById('feedback');
+                
+                if (isCorrect) {
+                    feedbackElement.textContent = `Correct! "${currentWord.korean}" means "${currentWord.meaning}".`;
+                    feedbackElement.className = 'feedback correct';
+                    this.selectedOption.classList.add('correct');
+                } else {
+                    feedbackElement.textContent = `Incorrect. "${currentWord.korean}" means "${currentWord.meaning}", not "${selectedMeaning}".`;
+                    feedbackElement.className = 'feedback incorrect';
+                    this.selectedOption.classList.add('incorrect');
+                    
+                    // Highlight correct option
+                    document.querySelectorAll('.option-btn').forEach(btn => {
+                        if (btn.dataset.meaning === currentWord.meaning) {
+                            btn.classList.add('correct');
+                        }
+                    });
+                }
+                
+                // Disable all options
+                document.querySelectorAll('.option-btn').forEach(btn => {
+                    btn.disabled = true;
+                });
+                
+                // Update button text
+                document.getElementById('nextBtn').innerHTML = '<i class="fas fa-arrow-right"></i> Continue';
+                
+                this.quizState = 'feedback';
+                this.updateStats();
+                this.updateWordList();
+            }
+            
+            nextQuestion() {
+                if (this.quizState === 'question' && this.selectedOption) {
+                    // Check answer first if in question state
+                    this.checkAnswer();
+                    return;
+                }
+                
+                // Move to next word
+                this.currentWordIndex = this.srs.getNextWord();
+                this.generateOptions();
+                this.showQuestion();
+            }
+            
+            showHint() {
+                const currentWord = allWords[this.currentWordIndex];
+                const hintElement = document.getElementById('wordMeaning');
+                
+                // Show the first letter of the meaning as a hint
+                const firstLetter = currentWord.meaning.charAt(0);
+                hintElement.textContent = `Hint: The meaning starts with "${firstLetter}"...`;
+                
+                // Disable hint button after use
+                document.getElementById('hintBtn').disabled = true;
+            }
+            
+            updateStats() {
+                const stats = this.srs.getStats();
+                
+                document.getElementById('totalWords').textContent = stats.total;
+                document.getElementById('masteredWords').textContent = stats.mastered;
+                document.getElementById('correctAnswers').textContent = stats.correct;
+                document.getElementById('accuracy').textContent = `${stats.accuracy}%`;
+            }
+            
+            updateWordList() {
+                const wordListElement = document.getElementById('wordList');
+                wordListElement.innerHTML = '';
+                
+                this.srs.progress.forEach((wordProgress, index) => {
+                    const word = allWords[index];
+                    const wordItem = document.createElement('div');
+                    wordItem.className = 'word-item';
+                    
+                    wordItem.innerHTML = `
+                        <div>
+                            <span class="word-item-korean">${word.korean}</span>
+                            <span class="word-item-level level-${wordProgress.level}"></span>
+                        </div>
+                        <div>
+                            <span class="word-item-meaning">${word.meaning}</span>
+                        </div>
+                        <div>
+                            <span class="word-item-stats">${wordProgress.correct}/${wordProgress.correct + wordProgress.incorrect}</span>
+                        </div>
+                    `;
+                    
+                    wordListElement.appendChild(wordItem);
+                });
+            }
+            
+            resetProgress() {
+                this.srs.resetProgress();
+                this.currentWordIndex = this.srs.getNextWord();
+                this.generateOptions();
+                this.showQuestion();
+                this.updateStats();
+                this.updateWordList();
+            }
+            
+            setupEventListeners() {
+                // Next button
+                document.getElementById('nextBtn').addEventListener('click', () => this.nextQuestion());
+                
+                // Hint button
+                document.getElementById('hintBtn').addEventListener('click', () => this.showHint());
+                
+                // Reset progress button
+                document.getElementById('resetProgress').addEventListener('click', () => {
+                    if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                        this.resetProgress();
+                    }
+                });
+                
+                // Theme toggle
+                document.getElementById('themeToggle').addEventListener('click', () => {
+                    document.body.classList.toggle('dark-mode');
+                    const icon = document.querySelector('#themeToggle i');
+                    if (document.body.classList.contains('dark-mode')) {
+                        icon.className = 'fas fa-sun';
+                    } else {
+                        icon.className = 'fas fa-moon';
+                    }
+                });
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    // Number keys 1-4 for selecting options
+                    if (this.quizState === 'question' && e.key >= '1' && e.key <= '4') {
+                        const index = parseInt(e.key) - 1;
+                        const optionButtons = document.querySelectorAll('.option-btn');
+                        if (index < optionButtons.length) {
+                            this.selectOption(optionButtons[index]);
+                        }
+                    }
+                    
+                    // Enter for next/check answer
+                    if (e.key === 'Enter') {
+                        this.nextQuestion();
+                    }
+                    
+                    // H for hint
+                    if (e.key === 'h' || e.key === 'H') {
+                        this.showHint();
+                    }
+                    
+                    // Spacebar for selecting the first option
+                    if (this.quizState === 'question' && e.key === ' ' && document.querySelectorAll('.option-btn').length > 0) {
+                        e.preventDefault();
+                        this.selectOption(document.querySelectorAll('.option-btn')[0]);
+                    }
+                });
+            }
+            
+            updateDisplay() {
+                this.showQuestion();
+            }
+        }
+
+        // Initialize the quiz when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const quiz = new VocabularyQuiz();
+            
+            // Expose quiz to console for debugging if needed
+            window.quiz = quiz;
+        });
+    </script>
+</body>
+</html>
