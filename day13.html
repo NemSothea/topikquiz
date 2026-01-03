@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Korean Vocabulary Learning App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #5cb85c;
+            --light-bg: #f8f9fa;
+            --light-text: #333;
+            --light-card: #ffffff;
+            --dark-bg: #1a1a2e;
+            --dark-text: #f8f9fa;
+            --dark-card: #16213e;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 10px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: var(--light-bg);
+            color: var(--light-text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        body.dark-mode {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h1 i {
+            font-size: 1.8rem;
+        }
+
+        .theme-toggle {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+        }
+
+        .app-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .mode-selector {
+            display: flex;
+            background-color: var(--light-card);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        body.dark-mode .mode-selector {
+            background-color: var(--dark-card);
+        }
+
+        .mode-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--light-text);
+        }
+
+        body.dark-mode .mode-btn {
+            color: var(--dark-text);
+        }
+
+        .mode-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .progress-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background-color: var(--light-card);
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        body.dark-mode .progress-info {
+            background-color: var(--dark-card);
+        }
+
+        .progress-bar {
+            width: 200px;
+            height: 12px;
+            background-color: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        body.dark-mode .progress-bar {
+            background-color: #2c2c54;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--accent-color);
+            border-radius: 6px;
+            transition: width 0.5s;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            background-color: var(--light-card);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        body.dark-mode .card {
+            background-color: var(--dark-card);
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 i {
+            font-size: 1.3rem;
+        }
+
+        /* Quiz Section */
+        .quiz-container {
+            margin-top: 20px;
+        }
+
+        .quiz-question {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            font-weight: 600;
+            text-align: center;
+            padding: 20px;
+            background-color: rgba(74, 111, 165, 0.1);
+            border-radius: var(--border-radius);
+        }
+
+        body.dark-mode .quiz-question {
+            background-color: rgba(74, 111, 165, 0.2);
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .quiz-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .quiz-option {
+            padding: 20px;
+            background-color: rgba(74, 111, 165, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        body.dark-mode .quiz-option {
+            background-color: rgba(74, 111, 165, 0.2);
+        }
+
+        .quiz-option:hover {
+            background-color: rgba(74, 111, 165, 0.2);
+            transform: translateY(-3px);
+        }
+
+        body.dark-mode .quiz-option:hover {
+            background-color: rgba(74, 111, 165, 0.3);
+        }
+
+        .quiz-option.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(74, 111, 165, 0.3);
+        }
+
+        .quiz-option.correct {
+            border-color: var(--accent-color);
+            background-color: rgba(92, 184, 92, 0.3);
+        }
+
+        .quiz-option.incorrect {
+            border-color: #d9534f;
+            background-color: rgba(217, 83, 79, 0.3);
+        }
+
+        .option-letter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+        .quiz-feedback {
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: none;
+            font-size: 1.1rem;
+        }
+
+        .quiz-feedback.correct {
+            background-color: rgba(92, 184, 92, 0.2);
+            border-left: 4px solid var(--accent-color);
+            display: block;
+        }
+
+        .quiz-feedback.incorrect {
+            background-color: rgba(217, 83, 79, 0.2);
+            border-left: 4px solid #d9534f;
+            display: block;
+        }
+
+        .quiz-example {
+            font-style: italic;
+            margin-top: 10px;
+            color: #666;
+            font-size: 1rem;
+        }
+
+        body.dark-mode .quiz-example {
+            color: #aaa;
+        }
+
+        .quiz-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Word List Section */
+        .word-list {
+            list-style-type: none;
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .word-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .word-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        body.dark-mode .word-list::-webkit-scrollbar-track {
+            background: #2c2c54;
+        }
+
+        .word-list::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .word-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: rgba(74, 111, 165, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        body.dark-mode .word-item {
+            background-color: rgba(74, 111, 165, 0.2);
+        }
+
+        .word-details {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .word-korean {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 5px;
+        }
+
+        body.dark-mode .word-korean {
+            color: #7aa2d1;
+        }
+
+        .word-english {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        body.dark-mode .word-english {
+            color: #aaa;
+        }
+
+        .word-example {
+            font-size: 0.95rem;
+            color: #777;
+            font-style: italic;
+        }
+
+        body.dark-mode .word-example {
+            color: #bbb;
+        }
+
+        .word-progress {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+        }
+
+        .progress-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ddd;
+        }
+
+        body.dark-mode .progress-dot {
+            background-color: #444;
+        }
+
+        .progress-dot.learned {
+            background-color: var(--accent-color);
+        }
+
+        .progress-dot.reviewing {
+            background-color: #f0ad4e;
+        }
+
+        .progress-dot.mastered {
+            background-color: #5bc0de;
+        }
+
+        .srs-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(74, 111, 165, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+        }
+
+        body.dark-mode .srs-info {
+            background-color: rgba(74, 111, 165, 0.2);
+        }
+
+        .srs-info i {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        body.dark-mode footer {
+            border-top: 1px solid #444;
+            color: #aaa;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background-color: var(--light-card);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        body.dark-mode .stat-card {
+            background-color: var(--dark-card);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        body.dark-mode .stat-label {
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-language"></i> Korean Vocabulary Master</h1>
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </header>
+
+        <div class="app-controls">
+            <div class="mode-selector">
+                <button class="mode-btn active" id="quizBtn">Quiz Mode</button>
+                <button class="mode-btn" id="listBtn">Word List</button>
+            </div>
+            <div class="progress-info">
+                <div>
+                    <div>Progress: <span id="progressText">0/15</span> words</div>
+                    <div>Next review: <span id="nextReview">0</span> words</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div class="card" id="quizSection">
+            <h2><i class="fas fa-question-circle"></i> Multiple Choice Quiz</h2>
+            
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-number" id="streakCount">0</div>
+                    <div class="stat-label">Current Streak</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="accuracyRate">0%</div>
+                    <div class="stat-label">Accuracy Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="wordsMastered">0</div>
+                    <div class="stat-label">Words Mastered</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="dueToday">0</div>
+                    <div class="stat-label">Due Today</div>
+                </div>
+            </div>
+            
+            <div class="quiz-container">
+                <div class="quiz-question" id="quizQuestion">What is the meaning of "혼란"?</div>
+                <div class="quiz-options" id="quizOptions">
+                    <!-- Options will be generated by JavaScript -->
+                </div>
+                <div class="quiz-feedback" id="quizFeedback"></div>
+                <div class="quiz-controls">
+                    <button class="btn btn-primary" id="submitQuizBtn">
+                        <i class="fas fa-paper-plane"></i> Submit Answer
+                    </button>
+                    <button class="btn btn-success hidden" id="nextQuizBtn">
+                        <i class="fas fa-arrow-right"></i> Next Question
+                    </button>
+                </div>
+            </div>
+            <div class="srs-info">
+                <i class="fas fa-chart-line"></i>
+                <div>
+                    <strong>Spaced Repetition System:</strong> Words you answer correctly will appear less frequently, while words you struggle with will appear more often. This optimizes long-term retention.
+                </div>
+            </div>
+        </div>
+
+        <!-- Word List Section -->
+        <div class="card hidden" id="listSection">
+            <h2><i class="fas fa-list-ul"></i> Vocabulary List</h2>
+            <ul class="word-list" id="wordList">
+                <!-- Word items will be generated by JavaScript -->
+            </ul>
+            <div class="srs-info">
+                <i class="fas fa-graduation-cap"></i>
+                <div>
+                    <strong>Learning Stages:</strong> 
+                    <span class="progress-dot"></span> New (0-1 correct) • 
+                    <span class="progress-dot reviewing"></span> Reviewing (2-3 correct) • 
+                    <span class="progress-dot learned"></span> Learned (4-5 correct) • 
+                    <span class="progress-dot mastered"></span> Mastered (6+ correct)
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Korean Vocabulary Learning App • Using Spaced Repetition System (SRS) for effective memorization</p>
+        </footer>
+    </div>
+
+    <script>
+        // Vocabulary data with examples
+        const vocabulary = [
+            { korean: "혼란", english: "Confusion", example: "그 소식은 대중에게 큰 혼란을 일으켰다. (The news caused great confusion among the public.)" },
+            { korean: "재능", english: "Talent", example: "그녀는 음악에 타고난 재능이 있다. (She has a natural talent for music.)" },
+            { korean: "부유하다", english: "Wealthy", example: "그 가족은 매우 부유하다. (That family is very wealthy.)" },
+            { korean: "증가하다", english: "Increase", example: "인구가 계속 증가하고 있다. (The population continues to increase.)" },
+            { korean: "해소하다", english: "Resolve", example: "문제를 해소하기 위해 노력하고 있습니다. (We are trying to resolve the problem.)" },
+            { korean: "서비스", english: "Service", example: "이 식당의 서비스는 매우 훌륭하다. (The service at this restaurant is excellent.)" },
+            { korean: "소극적", english: "Passive/Compliant", example: "그는 회의에서 소극적인 태도를 보였다. (He showed a passive attitude in the meeting.)" },
+            { korean: "확대하다", english: "Enlarge/Extend", example: "사업을 확대하기로 결정했다. (We decided to expand the business.)" },
+            { korean: "변하다", english: "Change", example: "날씨가 갑자기 변했다. (The weather changed suddenly.)" },
+            { korean: "현신", english: "Innovation/Revolution", example: "기술 현신이 산업을 변화시키고 있다. (Technological innovation is transforming the industry.)" },
+            { korean: "공통점", english: "Commonality/Similarity", example: "이 두 그림에는 몇 가지 공통점이 있다. (These two paintings have several similarities.)" },
+            { korean: "과거", english: "Past", example: "과거를 돌아보면 많은 것을 배울 수 있다. (Looking back at the past, we can learn a lot.)" },
+            { korean: "옮기다", english: "Move", example: "책상을 다른 방으로 옮겼다. (I moved the desk to another room.)" },
+            { korean: "누구나", english: "Anyone", example: "누구나 실수를 할 수 있다. (Anyone can make mistakes.)" },
+            { korean: "허락하다", english: "Permit/Allow", example: "교사는 학생들이 휴대폰을 사용하는 것을 허락했다. (The teacher allowed the students to use their phones.)" }
+        ];
+
+        // SRS variables
+        let currentQuizIndex = 0;
+        let selectedOption = null;
+        let quizAnswered = false;
+        let currentStreak = 0;
+        
+        // Learning progress data
+        let progress = JSON.parse(localStorage.getItem('koreanVocabProgress')) || {};
+        let stats = JSON.parse(localStorage.getItem('koreanVocabStats')) || {
+            totalQuestions: 0,
+            correctAnswers: 0,
+            currentStreak: 0,
+            bestStreak: 0,
+            lastStudyDate: null
+        };
+        
+        // Initialize progress for each word if not exists
+        vocabulary.forEach((word, index) => {
+            if (!progress[index]) {
+                progress[index] = {
+                    correctCount: 0,
+                    incorrectCount: 0,
+                    lastReviewed: null,
+                    nextReviewDays: 0,
+                    dueDate: new Date().toISOString()
+                };
+            }
+        });
+        
+        // Save progress to localStorage
+        function saveProgress() {
+            localStorage.setItem('koreanVocabProgress', JSON.stringify(progress));
+            localStorage.setItem('koreanVocabStats', JSON.stringify(stats));
+            updateProgressDisplay();
+            updateStats();
+        }
+        
+        // Update progress display
+        function updateProgressDisplay() {
+            const learnedCount = Object.values(progress).filter(p => p.correctCount >= 4).length;
+            const nextReviewCount = Object.values(progress).filter(p => {
+                const dueDate = new Date(p.dueDate);
+                const today = new Date();
+                return dueDate <= today;
+            }).length;
+            
+            document.getElementById('progressText').textContent = `${learnedCount}/${vocabulary.length}`;
+            document.getElementById('nextReview').textContent = nextReviewCount;
+            document.getElementById('progressFill').style.width = `${(learnedCount / vocabulary.length) * 100}%`;
+            
+            updateWordList();
+        }
+        
+        // Update statistics
+        function updateStats() {
+            const accuracy = stats.totalQuestions > 0 ? Math.round((stats.correctAnswers / stats.totalQuestions) * 100) : 0;
+            const wordsMastered = Object.values(progress).filter(p => p.correctCount >= 6).length;
+            const dueToday = Object.values(progress).filter(p => {
+                const dueDate = new Date(p.dueDate);
+                const today = new Date();
+                return dueDate <= today;
+            }).length;
+            
+            document.getElementById('streakCount').textContent = stats.currentStreak;
+            document.getElementById('accuracyRate').textContent = `${accuracy}%`;
+            document.getElementById('wordsMastered').textContent = wordsMastered;
+            document.getElementById('dueToday').textContent = dueToday;
+        }
+        
+        // Update word list display
+        function updateWordList() {
+            const wordList = document.getElementById('wordList');
+            wordList.innerHTML = '';
+            
+            vocabulary.forEach((word, index) => {
+                const wordData = progress[index];
+                const wordItem = document.createElement('li');
+                wordItem.className = 'word-item';
+                
+                // Determine learning stage based on correct count
+                let stageClass = '';
+                let stageText = '';
+                const correctCount = wordData.correctCount || 0;
+                
+                if (correctCount === 0) {
+                    stageText = 'New';
+                } else if (correctCount >= 1 && correctCount <= 3) {
+                    stageClass = 'reviewing';
+                    stageText = 'Reviewing';
+                } else if (correctCount >= 4 && correctCount <= 5) {
+                    stageClass = 'learned';
+                    stageText = 'Learned';
+                } else {
+                    stageClass = 'mastered';
+                    stageText = 'Mastered';
+                }
+                
+                wordItem.innerHTML = `
+                    <div class="word-details">
+                        <div class="word-korean">${word.korean}</div>
+                        <div class="word-english">${word.english}</div>
+                        <div class="word-example">${word.example}</div>
+                    </div>
+                    <div class="word-progress">
+                        <div class="progress-dots">
+                            ${Array.from({length: 6}, (_, i) => 
+                                `<div class="progress-dot ${i < correctCount ? stageClass : ''}"></div>`
+                            ).join('')}
+                        </div>
+                        <span>${stageText} (${correctCount}/6)</span>
+                    </div>
+                `;
+                
+                wordList.appendChild(wordItem);
+            });
+        }
+        
+        // Show quiz question
+        function showQuizQuestion() {
+            // Prioritize words that are due for review
+            const dueWords = [];
+            const otherWords = [];
+            const today = new Date();
+            
+            vocabulary.forEach((_, index) => {
+                const wordData = progress[index];
+                const dueDate = new Date(wordData.dueDate);
+                
+                if (dueDate <= today) {
+                    dueWords.push(index);
+                } else if (wordData.correctCount < 6) {
+                    otherWords.push(index);
+                }
+            });
+            
+            // Select a word to quiz
+            if (dueWords.length > 0) {
+                currentQuizIndex = dueWords[Math.floor(Math.random() * dueWords.length)];
+            } else if (otherWords.length > 0) {
+                currentQuizIndex = otherWords[Math.floor(Math.random() * otherWords.length)];
+            } else {
+                // All words mastered, select any random word
+                currentQuizIndex = Math.floor(Math.random() * vocabulary.length);
+            }
+            
+            const word = vocabulary[currentQuizIndex];
+            document.getElementById('quizQuestion').textContent = `What is the meaning of "${word.korean}"?`;
+            
+            // Generate options (1 correct + 3 random incorrect)
+            const options = [word.english];
+            
+            // Get 3 random incorrect options
+            while (options.length < 4) {
+                const randomIndex = Math.floor(Math.random() * vocabulary.length);
+                if (randomIndex !== currentQuizIndex && !options.includes(vocabulary[randomIndex].english)) {
+                    options.push(vocabulary[randomIndex].english);
+                }
+            }
+            
+            // Shuffle options
+            options.sort(() => Math.random() - 0.5);
+            
+            // Display options
+            const quizOptions = document.getElementById('quizOptions');
+            quizOptions.innerHTML = '';
+            
+            options.forEach((option, i) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'quiz-option';
+                optionElement.innerHTML = `
+                    <span class="option-letter">${String.fromCharCode(65 + i)}</span>
+                    <span>${option}</span>
+                `;
+                optionElement.dataset.value = option;
+                optionElement.addEventListener('click', () => selectOption(optionElement));
+                quizOptions.appendChild(optionElement);
+            });
+            
+            // Reset quiz state
+            selectedOption = null;
+            quizAnswered = false;
+            document.getElementById('quizFeedback').className = 'quiz-feedback hidden';
+            document.getElementById('submitQuizBtn').classList.remove('hidden');
+            document.getElementById('nextQuizBtn').classList.add('hidden');
+            
+            // Clear any previous selections
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            });
+        }
+        
+        // Select quiz option
+        function selectOption(optionElement) {
+            if (quizAnswered) return;
+            
+            // Remove selection from all options
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Select this option
+            optionElement.classList.add('selected');
+            selectedOption = optionElement.dataset.value;
+        }
+        
+        // Submit quiz answer
+        function submitQuizAnswer() {
+            if (!selectedOption || quizAnswered) return;
+            
+            const word = vocabulary[currentQuizIndex];
+            const isCorrect = selectedOption === word.english;
+            const feedback = document.getElementById('quizFeedback');
+            const wordData = progress[currentQuizIndex];
+            
+            // Mark correct/incorrect options
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                if (opt.dataset.value === word.english) {
+                    opt.classList.add('correct');
+                } else if (opt.dataset.value === selectedOption && !isCorrect) {
+                    opt.classList.add('incorrect');
+                }
+            });
+            
+            // Show feedback with example
+            feedback.innerHTML = isCorrect 
+                ? `<div>Correct! "${word.korean}" means "${word.english}".</div>`
+                : `<div>Incorrect. The correct answer is "${word.english}".</div>`;
+            
+            // Add example sentence to feedback
+            feedback.innerHTML += `<div class="quiz-example">Example: ${word.example}</div>`;
+            
+            feedback.className = `quiz-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+            
+            // Update stats
+            stats.totalQuestions++;
+            if (isCorrect) {
+                stats.correctAnswers++;
+                stats.currentStreak++;
+                if (stats.currentStreak > stats.bestStreak) {
+                    stats.bestStreak = stats.currentStreak;
+                }
+            } else {
+                stats.currentStreak = 0;
+            }
+            stats.lastStudyDate = new Date().toISOString();
+            
+            // Update word progress based on answer
+            if (isCorrect) {
+                wordData.correctCount = (wordData.correctCount || 0) + 1;
+                
+                // Calculate next review date based on SRS algorithm
+                // More correct answers = longer interval
+                const intervals = [1, 2, 4, 7, 14, 30]; // Days until next review
+                const intervalIndex = Math.min(wordData.correctCount - 1, intervals.length - 1);
+                const nextReviewDays = intervals[intervalIndex];
+                
+                wordData.nextReviewDays = nextReviewDays;
+                const nextDate = new Date();
+                nextDate.setDate(nextDate.getDate() + nextReviewDays);
+                wordData.dueDate = nextDate.toISOString();
+            } else {
+                wordData.incorrectCount = (wordData.incorrectCount || 0) + 1;
+                // If answered incorrectly, review again tomorrow
+                wordData.nextReviewDays = 1;
+                const nextDate = new Date();
+                nextDate.setDate(nextDate.getDate() + 1);
+                wordData.dueDate = nextDate.toISOString();
+            }
+            
+            wordData.lastReviewed = new Date().toISOString();
+            
+            saveProgress();
+            
+            // Show next button
+            document.getElementById('submitQuizBtn').classList.add('hidden');
+            document.getElementById('nextQuizBtn').classList.remove('hidden');
+            quizAnswered = true;
+        }
+        
+        // Go to next quiz question
+        function nextQuizQuestion() {
+            showQuizQuestion();
+        }
+        
+        // Switch between app modes
+        function switchMode(mode) {
+            // Update active button
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected mode
+            document.querySelectorAll('.card').forEach(card => {
+                card.classList.add('hidden');
+            });
+            
+            if (mode === 'quiz') {
+                document.getElementById('quizBtn').classList.add('active');
+                document.getElementById('quizSection').classList.remove('hidden');
+                showQuizQuestion();
+            } else if (mode === 'list') {
+                document.getElementById('listBtn').classList.add('active');
+                document.getElementById('listSection').classList.remove('hidden');
+                updateWordList();
+            }
+        }
+        
+        // Toggle dark mode
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const themeToggle = document.getElementById('themeToggle');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            
+            themeToggle.innerHTML = isDarkMode 
+                ? '<i class="fas fa-sun"></i>' 
+                : '<i class="fas fa-moon"></i>';
+                
+            localStorage.setItem('darkMode', isDarkMode);
+        }
+        
+        // Check if user studied today to maintain streak
+        function checkStreak() {
+            if (stats.lastStudyDate) {
+                const lastDate = new Date(stats.lastStudyDate);
+                const today = new Date();
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                // If last study was yesterday or today, streak continues
+                if (lastDate.toDateString() === today.toDateString() || 
+                    lastDate.toDateString() === yesterday.toDateString()) {
+                    // Streak is maintained
+                } else {
+                    // Streak broken
+                    stats.currentStreak = 0;
+                }
+            }
+        }
+        
+        // Initialize the app
+        function init() {
+            // Check streak
+            checkStreak();
+            
+            // Set up event listeners
+            document.getElementById('quizBtn').addEventListener('click', () => switchMode('quiz'));
+            document.getElementById('listBtn').addEventListener('click', () => switchMode('list'));
+            
+            document.getElementById('submitQuizBtn').addEventListener('click', submitQuizAnswer);
+            document.getElementById('nextQuizBtn').addEventListener('click', nextQuizQuestion);
+            
+            document.getElementById('themeToggle').addEventListener('click', toggleDarkMode);
+            
+            // Initialize with saved theme
+            const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (savedDarkMode) {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeToggle').innerHTML = '<i class="fas fa-sun"></i>';
+            }
+            
+            // Initialize progress and display
+            saveProgress();
+            showQuizQuestion();
+        }
+        
+        // Start the app when page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
