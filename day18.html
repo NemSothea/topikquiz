@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Korean Vocabulary Builder with SRS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --primary-dark: #385d8a;
+            --secondary: #e76f51;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --success: #2a9d8f;
+            --warning: #e9c46a;
+            --danger: #e63946;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        .dark-mode {
+            --primary: #5a8bd6;
+            --primary-dark: #4a7bc6;
+            --secondary: #ff7b54;
+            --light: #212529;
+            --dark: #f8f9fa;
+            --gray: #adb5bd;
+            --gray-light: #343a40;
+            --success: #4cc9a8;
+            --warning: #ffd166;
+            --danger: #ff6b6b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            transition: var(--transition);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--gray-light);
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: var(--secondary);
+            font-size: 28px;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--gray);
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            color: var(--primary);
+        }
+
+        .app-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background-color: var(--gray-light);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--dark);
+            transition: var(--transition);
+        }
+
+        .nav-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .nav-btn:hover:not(.active) {
+            background-color: var(--gray);
+            color: white;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--gray-light);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        .card-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--secondary);
+        }
+
+        /* Vocabulary List Styles */
+        .vocab-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .vocab-table th, .vocab-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .vocab-table th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .vocab-table tr:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-mode .vocab-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .korean-word {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .meaning {
+            color: var(--dark);
+        }
+
+        .example {
+            font-style: italic;
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        /* Quiz Styles */
+        .quiz-container {
+            text-align: center;
+        }
+
+        .quiz-header {
+            margin-bottom: 25px;
+        }
+
+        .quiz-progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .quiz-word {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 20px 0;
+        }
+
+        .quiz-meaning {
+            font-size: 20px;
+            margin-bottom: 30px;
+            color: var(--gray);
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 600px) {
+            .options-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .option {
+            padding: 15px;
+            background-color: var(--light);
+            border: 2px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+        }
+
+        .option:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .option.correct {
+            background-color: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .option.incorrect {
+            background-color: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        .quiz-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--gray);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--dark);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            opacity: 0.9;
+        }
+
+        /* SRS Dashboard */
+        .srs-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 600px) {
+            .srs-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-box {
+            background-color: var(--light);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .srs-levels {
+            margin-top: 20px;
+        }
+
+        .level-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .level-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .level-badge {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .level-0 .level-badge { background-color: var(--danger); }
+        .level-1 .level-badge { background-color: var(--warning); }
+        .level-2 .level-badge { background-color: #a7c957; }
+        .level-3 .level-badge { background-color: var(--success); }
+        .level-4 .level-badge { background-color: var(--primary); }
+
+        /* Word Details */
+        .word-detail-card {
+            display: none;
+        }
+
+        .word-detail-card.active {
+            display: block;
+        }
+
+        .word-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .word-korean {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .word-meaning {
+            font-size: 24px;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+
+        .word-example {
+            font-size: 18px;
+            line-height: 1.5;
+            color: var(--dark);
+            background-color: var(--light);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary);
+        }
+
+        .word-info {
+            margin-top: 25px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .info-box {
+            background-color: var(--light);
+            padding: 15px;
+            border-radius: var(--border-radius);
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 40px;
+            border-top: 1px solid var(--gray-light);
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-language"></i>
+                <h1>Korean Vocabulary Builder</h1>
+            </div>
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </header>
+
+        <div class="app-nav">
+            <button class="nav-btn active" data-target="vocab-list">Vocabulary List</button>
+            <button class="nav-btn" data-target="quiz">Quiz Mode</button>
+            <button class="nav-btn" data-target="srs-dashboard">SRS Dashboard</button>
+            <button class="nav-btn" data-target="word-detail">Word Details</button>
+        </div>
+
+        <div class="main-content">
+            <div>
+                <!-- Vocabulary List -->
+                <div class="card" id="vocab-list">
+                    <h2 class="card-title"><i class="fas fa-list"></i> Korean Vocabulary (15 Words)</h2>
+                    <table class="vocab-table">
+                        <thead>
+                            <tr>
+                                <th>Korean</th>
+                                <th>Meaning</th>
+                                <th>Example Sentence</th>
+                                <th>SRS Level</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vocab-table-body">
+                            <!-- Vocabulary will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Quiz Container -->
+                <div class="card hidden" id="quiz">
+                    <h2 class="card-title"><i class="fas fa-question-circle"></i> Multiple Choice Quiz</h2>
+                    <div class="quiz-container">
+                        <div class="quiz-header">
+                            <div class="quiz-progress">
+                                <span id="quiz-progress">Question 1 of 5</span>
+                                <span id="quiz-score">Score: 0/0</span>
+                            </div>
+                            <div class="quiz-word" id="quiz-word">요청하다</div>
+                            <div class="quiz-meaning" id="quiz-meaning">What is the meaning of this word?</div>
+                        </div>
+                        <div class="options-container" id="options-container">
+                            <!-- Options will be populated by JavaScript -->
+                        </div>
+                        <div class="quiz-buttons">
+                            <button class="btn btn-secondary" id="next-btn" disabled>Next Question</button>
+                            <button class="btn btn-primary" id="check-btn">Check Answer</button>
+                            <button class="btn btn-success" id="restart-btn">Restart Quiz</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SRS Dashboard -->
+                <div class="card hidden" id="srs-dashboard">
+                    <h2 class="card-title"><i class="fas fa-chart-line"></i> Spaced Repetition System Dashboard</h2>
+                    <div class="srs-stats">
+                        <div class="stat-box">
+                            <div class="stat-value" id="total-words">15</div>
+                            <div class="stat-label">Total Words</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="learned-words">0</div>
+                            <div class="stat-label">Learned</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="review-due">0</div>
+                            <div class="stat-label">Review Due</div>
+                        </div>
+                    </div>
+                    
+                    <h3 class="card-title"><i class="fas fa-layer-group"></i> SRS Levels</h3>
+                    <div class="srs-levels">
+                        <!-- SRS levels will be populated by JavaScript -->
+                    </div>
+                    
+                    <div style="margin-top: 25px; padding: 15px; background-color: var(--light); border-radius: var(--border-radius);">
+                        <h4 style="margin-bottom: 10px; color: var(--primary);">How SRS Works</h4>
+                        <p style="font-size: 14px; color: var(--dark);">
+                            The Spaced Repetition System (SRS) optimizes learning by scheduling reviews at increasing intervals. 
+                            Words you know well move to higher levels and are reviewed less frequently. 
+                            Words you struggle with stay in lower levels for more frequent review.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Word Detail -->
+                <div class="card hidden" id="word-detail">
+                    <h2 class="card-title"><i class="fas fa-info-circle"></i> Word Details</h2>
+                    <div class="word-detail-card active" id="word-detail-content">
+                        <!-- Word details will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div>
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-bullseye"></i> Today's Goal</h2>
+                    <div style="text-align: center; padding: 20px 0;">
+                        <div style="font-size: 48px; font-weight: 700; color: var(--primary);">5</div>
+                        <div style="color: var(--gray); margin-bottom: 20px;">Words to review today</div>
+                        <button class="btn btn-primary" id="start-review-btn">Start Review</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-fire"></i> Quick Actions</h2>
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                        <button class="btn btn-secondary" id="review-due-btn">
+                            <i class="fas fa-sync-alt"></i> Review Due Words
+                        </button>
+                        <button class="btn btn-secondary" id="practice-hard-btn">
+                            <i class="fas fa-brain"></i> Practice Hard Words
+                        </button>
+                        <button class="btn btn-secondary" id="random-quiz-btn">
+                            <i class="fas fa-random"></i> Random Quiz
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title"><i class="fas fa-trophy"></i> Learning Streak</h2>
+                    <div style="text-align: center; padding: 15px 0;">
+                        <div style="font-size: 32px; font-weight: 700; color: var(--secondary);">7</div>
+                        <div style="color: var(--gray);">Days in a row</div>
+                        <div style="margin-top: 15px; font-size: 14px; color: var(--success);">
+                            <i class="fas fa-check-circle"></i> You're on a roll!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Korean Vocabulary Builder with Spaced Repetition System (SRS) | Built with HTML, CSS & JavaScript</p>
+            <p style="margin-top: 5px;">Vocabulary data is stored locally in your browser</p>
+        </footer>
+    </div>
+
+    <script>
+        // Vocabulary data
+        const vocabulary = [
+            {
+                korean: "요청하다",
+                meaning: "Request",
+                example: "그는 도움을 요청했다. (He requested help.)",
+                srsLevel: 0,
+                lastReviewed: null,
+                nextReview: null
+            },
+            {
+                korean: "습관",
+                meaning: "Habit",
+                example: "아침 운동은 그의 일상 습관이다. (Morning exercise is his daily habit.)",
+                srsLevel: 0,
+                lastReviewed: null,
+                nextReview: null
+            },
+            {
+                korean: "대체하다",
+                meaning: "Replace",
+                example: "종이 봉지를 비닐 봉지로 대체했다. (We replaced paper bags with plastic bags.)",
+                srsLevel: 0,
+                lastReviewed: null,
+                nextReview: null
+            },
+            {
+                korean: "실력",
+                meaning: "Ability",
+                example: "그의 한국어 실력이 매우 향상되었다. (His Korean ability has improved a lot.)",
+                srsLevel: 0,
+                lastReviewed: null,
+                nextReview: null
+            },
+            {
+                korean: "방지하다",
+                meaning: "Prevent",
+                example: "사고를 방지하기 위해 안전 장치를 설치했다. (We installed safety devices to prevent accidents.)",
+                srsLevel: 0,
+                lastReviewed: null,
+                nextReview: null
+            },
+            {
+                korean: "깨끗하다",
+                meaning: "Clean",
+                example: "그녀는 방을 깨끗하게 청소했다. (She cleaned the room until it was spotless.)",
+                srsLevel: 0,
+                lastReviewed: null,
+                nextReview: null
+            },
+            {
+                korean: "최선을 다하다",
+                meaning: "Do one's best",
+                example: "시험에서 최선을 다했지만 결과가 좋지 않았다. (I did my best on the exam, but the result wasn't good.)",
+                srsLevel: 0,
+                lastReviewed: null,
+                nextReview: null
+            },
+            {
+                korean: "미래",
+                meaning: "Future",
+                example: "미래를 준비하는 것은 현명한 일이다. (Preparing for the future is wise.)",
+                srsLevel: 0,
+                lastReviewed: null,
+                nextReview: null
+            },
+            {
+                korean: "세균",
+                meaning: "Bacteria (virus, bug)",
+                example: "손을 자주 씻어 세균 감염을 예방하세요. (Wash your hands frequently to prevent bacterial infection.)",
+                srsLevel: 0,
+                lastReviewed: null,
+                nextReview: null
+            },
+            {
+                korean: "문제",
+                meaning: "Problem",
+                example: "이 수학 문제는 너무 어렵다. (This math problem is too difficult.)",
+                srsLevel: 0,
+                lastReviewed: null,
+                nextReview: null
+            },
+            {
+                korean: "추가하다",
+                meaning: "Add",
+                example: "레시피에 소금을 추가했다. (I added salt to the recipe.)",
+                srsLevel: 0,
+                lastReviewed: null,
+                nextReview: null
+            },
+            {
+                korean: "측정하다",
+                meaning: "Measure",
+                example: "체온을 측정하려면 체온계가 필요하다. (You need a thermometer to measure body temperature.)",
+                srsLevel: 0,
+                lastReviewed: null,
+                nextReview: null
+            },
+            {
+                korean: "단점",
+                meaning: "Weakness",
+                example: "그 계획의 가장 큰 단점은 비용이 너무 많이 든다는 것이다. (The biggest weakness of that plan is that it costs too much.)",
+                srsLevel: 0,
+                lastReviewed: null,
+                nextReview: null
+            },
+            {
+                korean: "타협하다",
+                meaning: "Compromise (Balance, agreement)",
+                example: "양측은 마침내 타협점을 찾았다. (Both sides finally found a compromise.)",
+                srsLevel: 0,
+                lastReviewed: null,
+                nextReview: null
+            },
+            {
+                korean: "본능",
+                meaning: "Instinct (nature)",
+                example: "동물은 본능적으로 위험을 감지한다. (Animals instinctively sense danger.)",
+                srsLevel: 0,
+                lastReviewed: null,
+                nextReview: null
+            }
+        ];
+
+        // SRS intervals (in hours) for each level
+        const srsIntervals = [0, 4, 24, 72, 168]; // Level 0-4
+
+        // App state
+        let currentView = 'vocab-list';
+        let darkMode = false;
+        let quizWords = [];
+        let currentQuizIndex = 0;
+        let quizScore = 0;
+        let selectedOption = null;
+        let quizCompleted = false;
+
+        // DOM elements
+        const themeToggle = document.getElementById('themeToggle');
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const contentSections = document.querySelectorAll('.card');
+        const vocabTableBody = document.getElementById('vocab-table-body');
+        const quizSection = document.getElementById('quiz');
+        const quizWordElement = document.getElementById('quiz-word');
+        const quizMeaningElement = document.getElementById('quiz-meaning');
+        const optionsContainer = document.getElementById('options-container');
+        const quizProgressElement = document.getElementById('quiz-progress');
+        const quizScoreElement = document.getElementById('quiz-score');
+        const nextBtn = document.getElementById('next-btn');
+        const checkBtn = document.getElementById('check-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const srsDashboard = document.getElementById('srs-dashboard');
+        const wordDetail = document.getElementById('word-detail');
+        const startReviewBtn = document.getElementById('start-review-btn');
+        const reviewDueBtn = document.getElementById('review-due-btn');
+        const practiceHardBtn = document.getElementById('practice-hard-btn');
+        const randomQuizBtn = document.getElementById('random-quiz-btn');
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadVocabulary();
+            setupEventListeners();
+            updateSRSDashboard();
+            generateQuiz();
+            
+            // Check for saved theme preference
+            if (localStorage.getItem('darkMode') === 'true') {
+                toggleDarkMode();
+            }
+        });
+
+        // Load vocabulary into the table
+        function loadVocabulary() {
+            vocabTableBody.innerHTML = '';
+            
+            vocabulary.forEach((word, index) => {
+                const row = document.createElement('tr');
+                row.dataset.index = index;
+                
+                // Color code based on SRS level
+                let levelClass = '';
+                switch(word.srsLevel) {
+                    case 0: levelClass = 'level-0'; break;
+                    case 1: levelClass = 'level-1'; break;
+                    case 2: levelClass = 'level-2'; break;
+                    case 3: levelClass = 'level-3'; break;
+                    case 4: levelClass = 'level-4'; break;
+                }
+                
+                row.innerHTML = `
+                    <td><span class="korean-word">${word.korean}</span></td>
+                    <td class="meaning">${word.meaning}</td>
+                    <td class="example">${word.example}</td>
+                    <td><span class="level-badge ${levelClass}"></span> Level ${word.srsLevel}</td>
+                `;
+                
+                // Add click event to show word details
+                row.addEventListener('click', () => {
+                    showWordDetail(index);
+                    switchView('word-detail');
+                });
+                
+                vocabTableBody.appendChild(row);
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Theme toggle
+            themeToggle.addEventListener('click', toggleDarkMode);
+            
+            // Navigation buttons
+            navBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const target = this.dataset.target;
+                    switchView(target);
+                });
+            });
+            
+            // Quiz buttons
+            checkBtn.addEventListener('click', checkAnswer);
+            nextBtn.addEventListener('click', nextQuestion);
+            restartBtn.addEventListener('click', restartQuiz);
+            
+            // Quick action buttons
+            startReviewBtn.addEventListener('click', startReview);
+            reviewDueBtn.addEventListener('click', reviewDueWords);
+            practiceHardBtn.addEventListener('click', practiceHardWords);
+            randomQuizBtn.addEventListener('click', randomQuiz);
+        }
+
+        // Switch between views
+        function switchView(view) {
+            // Update navigation buttons
+            navBtns.forEach(btn => {
+                if (btn.dataset.target === view) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Show/hide content sections
+            contentSections.forEach(section => {
+                if (section.id === view) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                }
+            });
+            
+            currentView = view;
+            
+            // Update views if needed
+            if (view === 'srs-dashboard') {
+                updateSRSDashboard();
+            }
+        }
+
+        // Toggle dark mode
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('dark-mode');
+            
+            // Update theme icon
+            const icon = themeToggle.querySelector('i');
+            if (darkMode) {
+                icon.className = 'fas fa-sun';
+            } else {
+                icon.className = 'fas fa-moon';
+            }
+            
+            // Save preference
+            localStorage.setItem('darkMode', darkMode);
+        }
+
+        // Generate quiz
+        function generateQuiz() {
+            // Reset quiz state
+            quizWords = [...vocabulary];
+            shuffleArray(quizWords);
+            quizWords = quizWords.slice(0, 5); // Take 5 random words
+            currentQuizIndex = 0;
+            quizScore = 0;
+            quizCompleted = false;
+            
+            // Display first question
+            displayQuizQuestion();
+        }
+
+        // Display quiz question
+        function displayQuizQuestion() {
+            if (currentQuizIndex >= quizWords.length) {
+                endQuiz();
+                return;
+            }
+            
+            const currentWord = quizWords[currentQuizIndex];
+            quizWordElement.textContent = currentWord.korean;
+            quizMeaningElement.textContent = "What is the meaning of this word?";
+            
+            // Update progress
+            quizProgressElement.textContent = `Question ${currentQuizIndex + 1} of ${quizWords.length}`;
+            quizScoreElement.textContent = `Score: ${quizScore}/${quizWords.length}`;
+            
+            // Generate options
+            generateOptions(currentWord);
+            
+            // Reset UI state
+            optionsContainer.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('correct', 'incorrect');
+                option.style.pointerEvents = 'auto';
+            });
+            
+            nextBtn.disabled = true;
+            checkBtn.disabled = false;
+            selectedOption = null;
+        }
+
+        // Generate multiple choice options
+        function generateOptions(correctWord) {
+            optionsContainer.innerHTML = '';
+            
+            // Create array of wrong options (exclude the correct one)
+            const wrongOptions = vocabulary
+                .filter(word => word.korean !== correctWord.korean)
+                .map(word => word.meaning);
+            
+            // Shuffle wrong options and take 3
+            shuffleArray(wrongOptions);
+            const selectedWrongOptions = wrongOptions.slice(0, 3);
+            
+            // Combine with correct option
+            const allOptions = [correctWord.meaning, ...selectedWrongOptions];
+            shuffleArray(allOptions);
+            
+            // Create option elements
+            allOptions.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                
+                optionElement.addEventListener('click', function() {
+                    if (checkBtn.disabled) return;
+                    
+                    // Deselect previous selection
+                    optionsContainer.querySelectorAll('.option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    // Select this option
+                    this.classList.add('selected');
+                    selectedOption = option;
+                });
+                
+                optionsContainer.appendChild(optionElement);
+            });
+        }
+
+        // Check answer
+        function checkAnswer() {
+            if (selectedOption === null) return;
+            
+            const currentWord = quizWords[currentQuizIndex];
+            const options = optionsContainer.querySelectorAll('.option');
+            
+            // Disable all options
+            options.forEach(option => {
+                option.style.pointerEvents = 'none';
+                
+                // Mark correct/incorrect
+                if (option.textContent === currentWord.meaning) {
+                    option.classList.add('correct');
+                } else if (option.textContent === selectedOption) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            // Update score if correct
+            if (selectedOption === currentWord.meaning) {
+                quizScore++;
+                
+                // Update SRS level for this word
+                const wordIndex = vocabulary.findIndex(w => w.korean === currentWord.korean);
+                if (wordIndex !== -1 && vocabulary[wordIndex].srsLevel < 4) {
+                    vocabulary[wordIndex].srsLevel++;
+                    vocabulary[wordIndex].lastReviewed = new Date();
+                    // Calculate next review based on SRS level
+                    const nextReview = new Date();
+                    nextReview.setHours(nextReview.getHours() + srsIntervals[vocabulary[wordIndex].srsLevel]);
+                    vocabulary[wordIndex].nextReview = nextReview;
+                    
+                    // Update table
+                    loadVocabulary();
+                    updateSRSDashboard();
+                }
+            } else {
+                // Decrease SRS level if wrong
+                const wordIndex = vocabulary.findIndex(w => w.korean === currentWord.korean);
+                if (wordIndex !== -1 && vocabulary[wordIndex].srsLevel > 0) {
+                    vocabulary[wordIndex].srsLevel--;
+                    vocabulary[wordIndex].lastReviewed = new Date();
+                    // Calculate next review based on SRS level
+                    const nextReview = new Date();
+                    nextReview.setHours(nextReview.getHours() + srsIntervals[vocabulary[wordIndex].srsLevel]);
+                    vocabulary[wordIndex].nextReview = nextReview;
+                    
+                    // Update table
+                    loadVocabulary();
+                    updateSRSDashboard();
+                }
+            }
+            
+            // Update score display
+            quizScoreElement.textContent = `Score: ${quizScore}/${quizWords.length}`;
+            
+            // Enable next button
+            nextBtn.disabled = false;
+            checkBtn.disabled = true;
+        }
+
+        // Next question
+        function nextQuestion() {
+            currentQuizIndex++;
+            displayQuizQuestion();
+        }
+
+        // End quiz
+        function endQuiz() {
+            quizWordElement.textContent = "Quiz Completed!";
+            quizMeaningElement.textContent = `Your score: ${quizScore} out of ${quizWords.length}`;
+            optionsContainer.innerHTML = '';
+            
+            // Show performance message
+            const performanceMessage = document.createElement('div');
+            performanceMessage.style.fontSize = '18px';
+            performanceMessage.style.marginTop = '20px';
+            
+            if (quizScore === quizWords.length) {
+                performanceMessage.textContent = "Excellent! You know all these words perfectly!";
+                performanceMessage.style.color = "var(--success)";
+            } else if (quizScore >= quizWords.length * 0.7) {
+                performanceMessage.textContent = "Good job! You're making great progress!";
+                performanceMessage.style.color = "var(--warning)";
+            } else {
+                performanceMessage.textContent = "Keep practicing! You'll improve with more review.";
+                performanceMessage.style.color = "var(--danger)";
+            }
+            
+            quizMeaningElement.appendChild(performanceMessage);
+            quizCompleted = true;
+        }
+
+        // Restart quiz
+        function restartQuiz() {
+            generateQuiz();
+        }
+
+        // Update SRS dashboard
+        function updateSRSDashboard() {
+            // Calculate stats
+            const totalWords = vocabulary.length;
+            const learnedWords = vocabulary.filter(word => word.srsLevel >= 3).length;
+            const reviewDue = vocabulary.filter(word => {
+                if (!word.nextReview) return false;
+                return new Date() >= new Date(word.nextReview);
+            }).length;
+            
+            // Update stat boxes
+            document.getElementById('total-words').textContent = totalWords;
+            document.getElementById('learned-words').textContent = learnedWords;
+            document.getElementById('review-due').textContent = reviewDue;
+            
+            // Update SRS levels
+            const srsLevelsContainer = document.querySelector('.srs-levels');
+            srsLevelsContainer.innerHTML = '';
+            
+            // Count words in each level
+            const levelCounts = [0, 0, 0, 0, 0];
+            vocabulary.forEach(word => {
+                levelCounts[word.srsLevel]++;
+            });
+            
+            // Create level items
+            for (let i = 0; i < 5; i++) {
+                const levelItem = document.createElement('div');
+                levelItem.className = `level-item level-${i}`;
+                
+                const levelName = document.createElement('div');
+                levelName.className = 'level-name';
+                
+                const levelBadge = document.createElement('div');
+                levelBadge.className = 'level-badge';
+                
+                const levelText = document.createElement('span');
+                levelText.textContent = getLevelName(i);
+                
+                levelName.appendChild(levelBadge);
+                levelName.appendChild(levelText);
+                
+                const levelCount = document.createElement('div');
+                levelCount.textContent = `${levelCounts[i]} words`;
+                
+                levelItem.appendChild(levelName);
+                levelItem.appendChild(levelCount);
+                
+                srsLevelsContainer.appendChild(levelItem);
+            }
+        }
+
+        // Get level name
+        function getLevelName(level) {
+            switch(level) {
+                case 0: return "New";
+                case 1: return "Learning";
+                case 2: return "Reviewing";
+                case 3: return "Known";
+                case 4: return "Mastered";
+                default: return "Unknown";
+            }
+        }
+
+        // Show word detail
+        function showWordDetail(index) {
+            const word = vocabulary[index];
+            const wordDetailContent = document.getElementById('word-detail-content');
+            
+            let levelClass = '';
+            switch(word.srsLevel) {
+                case 0: levelClass = 'level-0'; break;
+                case 1: levelClass = 'level-1'; break;
+                case 2: levelClass = 'level-2'; break;
+                case 3: levelClass = 'level-3'; break;
+                case 4: levelClass = 'level-4'; break;
+            }
+            
+            wordDetailContent.innerHTML = `
+                <div class="word-header">
+                    <div class="word-korean">${word.korean}</div>
+                    <div class="word-meaning">${word.meaning}</div>
+                    <div><span class="level-badge ${levelClass}"></span> SRS Level ${word.srsLevel}</div>
+                </div>
+                
+                <div class="word-example">
+                    <strong>Example:</strong> ${word.example}
+                </div>
+                
+                <div class="word-info">
+                    <div class="info-box">
+                        <div class="info-label">Part of Speech</div>
+                        <div class="info-value">${getPartOfSpeech(word.korean)}</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Difficulty</div>
+                        <div class="info-value">${getDifficulty(word.srsLevel)}</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Last Reviewed</div>
+                        <div class="info-value">${word.lastReviewed ? formatDate(word.lastReviewed) : 'Never'}</div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-label">Next Review</div>
+                        <div class="info-value">${word.nextReview ? formatDate(word.nextReview) : 'Not scheduled'}</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: center;">
+                    <button class="btn btn-primary" onclick="practiceWord(${index})">
+                        <i class="fas fa-dumbbell"></i> Practice This Word
+                    </button>
+                    <button class="btn btn-secondary" onclick="showNextWord(${index})">
+                        <i class="fas fa-arrow-right"></i> Next Word
+                    </button>
+                </div>
+            `;
+        }
+
+        // Helper functions
+        function getPartOfSpeech(koreanWord) {
+            // Simple heuristic for part of speech based on Korean verb endings
+            if (koreanWord.endsWith('하다')) return "Verb (하다 verb)";
+            if (koreanWord.endsWith('다')) return "Verb";
+            return "Noun";
+        }
+
+        function getDifficulty(level) {
+            switch(level) {
+                case 0: return "New";
+                case 1: return "Hard";
+                case 2: return "Medium";
+                case 3: return "Easy";
+                case 4: return "Mastered";
+                default: return "Unknown";
+            }
+        }
+
+        function formatDate(date) {
+            if (!date) return "N/A";
+            if (typeof date === 'string') date = new Date(date);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Quick action functions
+        function startReview() {
+            // Find words due for review
+            const dueWords = vocabulary.filter(word => {
+                if (!word.nextReview) return true; // Never reviewed
+                return new Date() >= new Date(word.nextReview);
+            });
+            
+            if (dueWords.length === 0) {
+                alert("No words due for review right now. Great job!");
+                return;
+            }
+            
+            // Start quiz with due words
+            quizWords = dueWords.slice(0, 5); // Take up to 5 due words
+            shuffleArray(quizWords);
+            currentQuizIndex = 0;
+            quizScore = 0;
+            quizCompleted = false;
+            
+            // Switch to quiz view
+            switchView('quiz');
+            displayQuizQuestion();
+        }
+
+        function reviewDueWords() {
+            startReview();
+        }
+
+        function practiceHardWords() {
+            // Find words with low SRS levels
+            const hardWords = vocabulary.filter(word => word.srsLevel <= 1);
+            
+            if (hardWords.length === 0) {
+                alert("No hard words found. You're doing great!");
+                return;
+            }
+            
+            // Start quiz with hard words
+            quizWords = hardWords.slice(0, 5);
+            shuffleArray(quizWords);
+            currentQuizIndex = 0;
+            quizScore = 0;
+            quizCompleted = false;
+            
+            // Switch to quiz view
+            switchView('quiz');
+            displayQuizQuestion();
+        }
+
+        function randomQuiz() {
+            generateQuiz();
+            switchView('quiz');
+        }
+
+        // Global functions for word detail buttons
+        window.practiceWord = function(index) {
+            // Create a quiz with just this word
+            quizWords = [vocabulary[index]];
+            currentQuizIndex = 0;
+            quizScore = 0;
+            quizCompleted = false;
+            
+            // Switch to quiz view
+            switchView('quiz');
+            displayQuizQuestion();
+        };
+
+        window.showNextWord = function(currentIndex) {
+            const nextIndex = (currentIndex + 1) % vocabulary.length;
+            showWordDetail(nextIndex);
+        };
+    </script>
+</body>
+</html>
