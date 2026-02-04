@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vocabulary Trainer (SRS + Quiz)</title>
+  <style>
+    :root{
+      --bg:#ffffff; --text:#111827; --muted:#6b7280;
+      --card:#f3f4f6; --border:#e5e7eb; --btn:#111827; --btnText:#ffffff;
+      --good:#16a34a; --bad:#dc2626; --warn:#f59e0b;
+      --shadow: 0 10px 25px rgba(0,0,0,.08);
+      --radius:16px;
+    }
+    [data-theme="dark"]{
+      --bg:#0b1220; --text:#e5e7eb; --muted:#9ca3af;
+      --card:#0f1b32; --border:#1f2a44; --btn:#e5e7eb; --btnText:#0b1220;
+      --shadow: 0 10px 25px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background:var(--bg); color:var(--text);
+    }
+    .wrap{max-width:980px; margin:0 auto; padding:18px;}
+    header{
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      padding:14px 16px; border:1px solid var(--border); border-radius:var(--radius);
+      background:linear-gradient(180deg, rgba(255,255,255,.6), rgba(255,255,255,.0));
+      box-shadow:var(--shadow);
+    }
+    [data-theme="dark"] header{
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.0));
+    }
+    .title{display:flex; flex-direction:column; gap:2px}
+    .title h1{margin:0; font-size:18px; letter-spacing:.2px}
+    .title p{margin:0; font-size:12px; color:var(--muted)}
+    .controls{display:flex; gap:10px; align-items:center}
+    .chip{
+      border:1px solid var(--border); background:var(--card); color:var(--text);
+      padding:8px 10px; border-radius:999px; font-size:12px; display:inline-flex; gap:8px; align-items:center;
+      user-select:none;
+    }
+    .btn{
+      border:1px solid var(--border); background:var(--btn); color:var(--btnText);
+      padding:9px 12px; border-radius:12px; font-weight:600; cursor:pointer;
+      transition: transform .05s ease, opacity .15s ease;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn.secondary{
+      background:transparent; color:var(--text);
+    }
+    .grid{
+      display:grid; grid-template-columns: 1.25fr .75fr; gap:14px; margin-top:14px;
+    }
+    @media (max-width: 860px){
+      .grid{grid-template-columns:1fr}
+    }
+    .card{
+      border:1px solid var(--border); background:var(--card);
+      border-radius:var(--radius); padding:16px; box-shadow:var(--shadow);
+    }
+    .questionTop{display:flex; justify-content:space-between; gap:10px; align-items:flex-start}
+    .qBadge{
+      font-size:12px; color:var(--muted); border:1px dashed var(--border);
+      padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.25);
+    }
+    [data-theme="dark"] .qBadge{background:rgba(255,255,255,.06)}
+    .word{
+      font-size:42px; font-weight:800; letter-spacing:.2px; margin:10px 0 2px 0;
+    }
+    .hint{color:var(--muted); font-size:13px; margin:0}
+    .choices{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px}
+    @media (max-width: 520px){ .choices{grid-template-columns:1fr} }
+    .choice{
+      width:100%;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.55);
+      color:var(--text);
+      padding:12px 12px; border-radius:14px; cursor:pointer;
+      font-size:14px; text-align:left; font-weight:600;
+      transition: transform .05s ease, background .15s ease, border-color .15s ease;
+    }
+    [data-theme="dark"] .choice{background:rgba(255,255,255,.06)}
+    .choice:hover{transform: translateY(-1px)}
+    .choice:disabled{opacity:.7; cursor:not-allowed; transform:none}
+    .choice.good{border-color: rgba(22,163,74,.5); background: rgba(22,163,74,.12)}
+    .choice.bad{border-color: rgba(220,38,38,.5); background: rgba(220,38,38,.12)}
+    .feedback{
+      margin-top:12px; padding:10px 12px; border-radius:14px;
+      border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:12px;
+      background:rgba(255,255,255,.45);
+    }
+    [data-theme="dark"] .feedback{background:rgba(255,255,255,.06)}
+    .fbLeft{display:flex; flex-direction:column; gap:2px}
+    .fbTitle{font-weight:800; font-size:14px}
+    .fbSub{color:var(--muted); font-size:12px}
+    .pill{
+      font-size:12px; padding:6px 10px; border-radius:999px; border:1px solid var(--border);
+      background:rgba(255,255,255,.35);
+      white-space:nowrap;
+    }
+    [data-theme="dark"] .pill{background:rgba(255,255,255,.06)}
+    .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px}
+    .mini{
+      padding:8px 10px; border-radius:12px; border:1px solid var(--border);
+      background:rgba(255,255,255,.35); color:var(--text); cursor:pointer; font-weight:700; font-size:12px;
+    }
+    [data-theme="dark"] .mini{background:rgba(255,255,255,.06)}
+    .side h2{margin:0 0 10px 0; font-size:14px}
+    .list{display:flex; flex-direction:column; gap:10px}
+    .item{
+      border:1px solid var(--border); border-radius:14px; padding:10px 10px; background:rgba(255,255,255,.45);
+    }
+    [data-theme="dark"] .item{background:rgba(255,255,255,.06)}
+    .itemTop{display:flex; justify-content:space-between; gap:8px; align-items:center}
+    .ko{font-weight:900}
+    .en{color:var(--muted); font-size:12px; margin-top:4px}
+    .tag{
+      font-size:11px; padding:4px 8px; border-radius:999px; border:1px solid var(--border);
+    }
+    .tag.new{background:rgba(245,158,11,.12); color:var(--warn)}
+    .tag.learn{background:rgba(59,130,246,.12); color:#3b82f6}
+    .tag.master{background:rgba(22,163,74,.12); color:var(--good)}
+    footer{
+      margin-top:14px; color:var(--muted); font-size:12px; text-align:center;
+    }
+    code.kbd{
+      padding:2px 6px; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,.35);
+    }
+    [data-theme="dark"] code.kbd{background:rgba(255,255,255,.06)}
+  </style>
+</head>
+
+<body>
+  <div class="wrap" id="root" data-theme="light">
+    <header>
+      <div class="title">
+        <h1>📘 Vocabulary Trainer (15 words)</h1>
+        <p>MCQ Quiz + Simple SRS (localStorage) • Responsive • Dark Mode</p>
+      </div>
+      <div class="controls">
+        <div class="chip" title="Words due for review today">
+          <span>Due:</span> <strong id="dueCount">0</strong>
+        </div>
+        <button class="btn secondary" id="resetBtn" title="Reset progress">Reset</button>
+        <button class="btn" id="themeBtn" title="Toggle dark mode">🌙</button>
+      </div>
+    </header>
+
+    <section class="grid">
+      <!-- Main quiz -->
+      <div class="card">
+        <div class="questionTop">
+          <div>
+            <div class="qBadge" id="modeBadge">Mode: Due (SRS)</div>
+          </div>
+          <div class="qBadge" id="streakBadge">Streak: 0</div>
+        </div>
+
+        <div class="word" id="wordKo">—</div>
+        <p class="hint" id="hintLine">Pick the correct English meaning.</p>
+
+        <div class="choices" id="choices"></div>
+
+        <div class="feedback" id="feedback" style="display:none;">
+          <div class="fbLeft">
+            <div class="fbTitle" id="fbTitle">—</div>
+            <div class="fbSub" id="fbSub">—</div>
+          </div>
+          <div class="pill" id="srsPill">—</div>
+        </div>
+
+        <div class="row">
+          <button class="mini" id="nextBtn">Next (Enter)</button>
+          <button class="mini" id="showExampleBtn">Show example</button>
+          <button class="mini" id="toggleModeBtn">Switch mode</button>
+        </div>
+
+        <div class="card" style="margin-top:14px;">
+          <h2 style="margin:0 0 8px 0; font-size:14px;">✅ Meaning checks (your list)</h2>
+          <div id="checks" style="display:grid; gap:8px;"></div>
+        </div>
+      </div>
+
+      <!-- Side panel -->
+      <div class="card side">
+        <h2>Word list + status</h2>
+        <div class="list" id="wordList"></div>
+
+        <div class="card" style="margin-top:14px;">
+          <h2 style="margin:0 0 8px 0; font-size:14px;">How SRS works here</h2>
+          <div style="color:var(--muted); font-size:12px; line-height:1.5;">
+            <div>🟢 New → show often</div>
+            <div>🟡 Learning → after 1 day</div>
+            <div>🔵 Mastered → after 3–5 days</div>
+            <div style="margin-top:8px;">Tip: press <code class="kbd">Enter</code> for Next</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Progress is saved on this device via <code class="kbd">localStorage</code>.
+    </footer>
+  </div>
+
+  <script>
+    // -----------------------------
+    // DATA (15 words + examples + checks)
+    // -----------------------------
+    const WORDS = [
+      { id: "w1", ko: "염려하다", en: "worry", note: "✅ correct", natural: "worry (about)", example: "I worry about my future." },
+      { id: "w2", ko: "역량", en: "capability", note: "⚠️ ok (also competence)", natural: "capability / competence", example: "She has the capability to lead the team." },
+      { id: "w3", ko: "기르다", en: "raise", note: "⚠️ depends on context", natural: "raise / grow / develop", example: "They raise chickens. / He developed his skills." },
+      { id: "w4", ko: "조치하다", en: "take action", note: "✅ correct", natural: "take action", example: "The company took action immediately." },
+      { id: "w5", ko: "과학", en: "science", note: "✅ correct", natural: "science", example: "Science helps us understand the world." },
+      { id: "w6", ko: "언제든지", en: "anytime", note: "✅ correct", natural: "anytime", example: "Call me anytime." },
+      { id: "w7", ko: "격려하다", en: "encourage", note: "✅ correct", natural: "encourage", example: "Teachers encourage students to try again." },
+      { id: "w8", ko: "경쟁하다", en: "compete", note: "✅ correct", natural: "compete (with)", example: "We compete with global companies." },
+      { id: "w9", ko: "알려지다", en: "be known", note: "⚠️ add for/as", natural: "be known (for/as)", example: "He is known for his honesty." },
+      { id: "w10", ko: "발견하다", en: "discover", note: "✅ correct", natural: "discover", example: "Scientists discovered a new planet." },
+      { id: "w11", ko: "제작하다", en: "manufacture", note: "⚠️ formal (make/produce too)", natural: "make / manufacture / produce", example: "The company manufactures cars." },
+      { id: "w12", ko: "고치다", en: "fix", note: "⚠️ fix = casual, repair = formal", natural: "fix / repair", example: "Can you fix my laptop?" },
+      { id: "w13", ko: "도구", en: "tool", note: "✅ correct", natural: "tool", example: "This app is a useful tool." },
+      { id: "w14", ko: "대처하다", en: "handle", note: "⚠️ also deal with", natural: "handle / deal with", example: "She handled the problem well." },
+      { id: "w15", ko: "경험하다", en: "experience", note: "⚠️ verb/noun", natural: "experience", example: "I experienced many challenges." }
+    ];
+
+    // -----------------------------
+    // Simple SRS model (beginner-friendly)
+    // new: correctCount=0
+    // learning: correctCount=1 (next in 1 day)
+    // mastered: correctCount>=2 (next in 3-5 days)
+    // wrong answer: reduce (back toward new)
+    // -----------------------------
+    const STORAGE_KEY = "vocab_srs_v1";
+    const THEME_KEY = "vocab_theme_v1";
+
+    function todayStart() {
+      const d = new Date();
+      d.setHours(0,0,0,0);
+      return d;
+    }
+    function addDays(date, days){
+      const d = new Date(date);
+      d.setDate(d.getDate() + days);
+      return d;
+    }
+    function randInt(min, max){ // inclusive
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function loadProgress(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        const init = {};
+        for (const w of WORDS) {
+          init[w.id] = { correctCount: 0, lastReviewed: null, nextReview: todayStart().toISOString() };
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(init));
+        return init;
+      }
+      try { return JSON.parse(raw); } catch { return {}; }
+    }
+
+    function saveProgress(p){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+    }
+
+    function getStage(correctCount){
+      if (correctCount >= 2) return "master";
+      if (correctCount === 1) return "learn";
+      return "new";
+    }
+
+    function scheduleNext(correctCount, wasCorrect){
+      const base = todayStart();
+      if (!wasCorrect) return base; // show again today
+      if (correctCount === 1) return addDays(base, 1);           // learning
+      if (correctCount >= 2) return addDays(base, randInt(3,5)); // mastered
+      return base;
+    }
+
+    function isDue(progItem){
+      const now = todayStart();
+      const next = new Date(progItem.nextReview);
+      next.setHours(0,0,0,0);
+      return next <= now;
+    }
+
+    // -----------------------------
+    // Quiz logic
+    // Modes: "due" (SRS) or "all" (random)
+    // -----------------------------
+    let progress = loadProgress();
+    let mode = "due";
+    let streak = 0;
+    let currentWord = null;
+    let locked = false;
+
+    const el = (id) => document.getElementById(id);
+
+    function dueWords(){
+      return WORDS.filter(w => progress[w.id] && isDue(progress[w.id]));
+    }
+
+    function updateDueCount(){
+      el("dueCount").textContent = String(dueWords().length);
+    }
+
+    function buildWordList(){
+      const list = el("wordList");
+      list.innerHTML = "";
+      for (const w of WORDS){
+        const p = progress[w.id] || {correctCount:0, nextReview: todayStart().toISOString()};
+        const stage = getStage(p.correctCount);
+        const tagText = stage === "new" ? "New" : stage === "learn" ? "Learning" : "Mastered";
+        const next = new Date(p.nextReview);
+        const nextText = `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,"0")}-${String(next.getDate()).padStart(2,"0")}`;
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <div class="itemTop">
+            <div class="ko">${w.ko}</div>
+            <div class="tag ${stage}">${tagText}</div>
+          </div>
+          <div class="en">${w.en} • next: ${nextText}</div>
+        `;
+        list.appendChild(div);
+      }
+    }
+
+    function renderChecks(){
+      const box = el("checks");
+      box.innerHTML = "";
+      for (const w of WORDS){
+        const row = document.createElement("div");
+        row.className = "item";
+        row.innerHTML = `
+          <div class="itemTop">
+            <div><strong>${w.ko}</strong> = ${w.en}</div>
+            <div class="tag ${getStage(progress[w.id]?.correctCount ?? 0)}">${w.note}</div>
+          </div>
+          <div class="en">Natural: ${w.natural}</div>
+          <div class="en">Example: ${w.example}</div>
+        `;
+        box.appendChild(row);
+      }
+    }
+
+    function pickNextWord(){
+      const pool = (mode === "due") ? dueWords() : WORDS.slice();
+      // if due mode but nothing due, fall back to all
+      const finalPool = pool.length ? pool : WORDS.slice();
+      return finalPool[Math.floor(Math.random() * finalPool.length)];
+    }
+
+    function makeChoices(correct){
+      // pick 3 wrong + 1 correct, shuffle
+      const wrongs = WORDS
+        .filter(w => w.en !== correct)
+        .map(w => w.en);
+
+      // shuffle wrongs
+      wrongs.sort(() => 0.5 - Math.random());
+      const options = wrongs.slice(0, 3).concat([correct]);
+      options.sort(() => 0.5 - Math.random());
+      return options;
+    }
+
+    function setFeedback(visible, title="", sub="", pill=""){
+      const fb = el("feedback");
+      if (!visible){
+        fb.style.display = "none";
+        return;
+      }
+      fb.style.display = "flex";
+      el("fbTitle").textContent = title;
+      el("fbSub").textContent = sub;
+      el("srsPill").textContent = pill;
+    }
+
+    function renderQuestion(){
+      locked = false;
+      setFeedback(false);
+
+      currentWord = pickNextWord();
+      el("wordKo").textContent = currentWord.ko;
+
+      const p = progress[currentWord.id] || {correctCount:0, nextReview: todayStart().toISOString()};
+      const stage = getStage(p.correctCount);
+      const stageText = stage === "new" ? "New" : stage === "learn" ? "Learning" : "Mastered";
+      el("hintLine").textContent = `Pick the correct English meaning. (Status: ${stageText})`;
+
+      el("modeBadge").textContent = `Mode: ${mode === "due" ? "Due (SRS)" : "All (Random)"}`;
+      el("streakBadge").textContent = `Streak: ${streak}`;
+
+      const options = makeChoices(currentWord.en);
+      const choicesBox = el("choices");
+      choicesBox.innerHTML = "";
+
+      for (const opt of options){
+        const btn = document.createElement("button");
+        btn.className = "choice";
+        btn.textContent = opt;
+        btn.onclick = () => answer(opt, btn);
+        choicesBox.appendChild(btn);
+      }
+
+      updateDueCount();
+      buildWordList();
+    }
+
+    function answer(selected, selectedBtn){
+      if (locked) return;
+      locked = true;
+
+      const buttons = Array.from(document.querySelectorAll(".choice"));
+      for (const b of buttons) b.disabled = true;
+
+      const correct = currentWord.en;
+      const wasCorrect = selected === correct;
+
+      // mark buttons
+      for (const b of buttons){
+        if (b.textContent === correct) b.classList.add("good");
+      }
+      if (!wasCorrect) selectedBtn.classList.add("bad");
+
+      // update progress
+      const p = progress[currentWord.id] || { correctCount: 0, lastReviewed: null, nextReview: todayStart().toISOString() };
+
+      if (wasCorrect){
+        p.correctCount = Math.min(3, (p.correctCount || 0) + 1);
+        streak += 1;
+      } else {
+        p.correctCount = Math.max(0, (p.correctCount || 0) - 1);
+        streak = 0;
+      }
+      p.lastReviewed = new Date().toISOString();
+      p.nextReview = scheduleNext(p.correctCount, wasCorrect).toISOString();
+      progress[currentWord.id] = p;
+      saveProgress(progress);
+
+      const stage = getStage(p.correctCount);
+      const stageText = stage === "new" ? "New" : stage === "learn" ? "Learning" : "Mastered";
+
+      const title = wasCorrect ? "✅ Correct!" : "❌ Not quite";
+      const sub = wasCorrect
+        ? `“${currentWord.ko}” = “${currentWord.en}”. Example: ${currentWord.example}`
+        : `Correct answer: “${correct}”. Example: ${currentWord.example}`;
+
+      const next = new Date(p.nextReview);
+      const nextText = `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,"0")}-${String(next.getDate()).padStart(2,"0")}`;
+      const pill = `SRS: ${stageText} • Next: ${nextText}`;
+
+      setFeedback(true, title, sub, pill);
+      el("streakBadge").textContent = `Streak: ${streak}`;
+
+      updateDueCount();
+      buildWordList();
+    }
+
+    // -----------------------------
+    // Controls
+    // -----------------------------
+    el("nextBtn").addEventListener("click", () => renderQuestion());
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") renderQuestion();
+    });
+
+    el("showExampleBtn").addEventListener("click", () => {
+      if (!currentWord) return;
+      setFeedback(true, "📌 Example", currentWord.example, `Meaning: ${currentWord.en}`);
+    });
+
+    el("toggleModeBtn").addEventListener("click", () => {
+      mode = (mode === "due") ? "all" : "due";
+      renderQuestion();
+    });
+
+    el("resetBtn").addEventListener("click", () => {
+      if (!confirm("Reset all SRS progress?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      progress = loadProgress();
+      streak = 0;
+      renderQuestion();
+      renderChecks();
+    });
+
+    function setTheme(theme){
+      el("root").setAttribute("data-theme", theme);
+      localStorage.setItem(THEME_KEY, theme);
+      el("themeBtn").textContent = theme === "dark" ? "☀️" : "🌙";
+    }
+
+    el("themeBtn").addEventListener("click", () => {
+      const cur = el("root").getAttribute("data-theme");
+      setTheme(cur === "dark" ? "light" : "dark");
+    });
+
+    // init
+    (function init(){
+      const savedTheme = localStorage.getItem(THEME_KEY) || "light";
+      setTheme(savedTheme);
+
+      updateDueCount();
+      buildWordList();
+      renderChecks();
+      renderQuestion();
+    })();
+  </script>
+</body>
+</html>
