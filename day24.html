@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌱 SRS vocabulary · 15 words (spaced repetition)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s;
+    }
+
+    /* light mode default */
+    :root {
+      --bg: #f6f9fc;
+      --card: #ffffff;
+      --text: #1a2b3e;
+      --text-light: #2c3e50;
+      --border: #d4e0e9;
+      --accent: #1f6f8b;
+      --accent-soft: #99c9db;
+      --option-bg: #f0f4f8;
+      --option-hover: #dbeaf1;
+      --option-selected: #b3d9e8;
+      --btn-bg: #1f6f8b;
+      --btn-text: white;
+      --btn-disabled: #a0b8c5;
+      --shadow: rgba(0,20,30,0.1) 0 8px 18px;
+      --tag: #e1ecf2;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121c24;
+        --card: #1e2b36;
+        --text: #e2edf7;
+        --text-light: #b6cdde;
+        --border: #2f4150;
+        --accent: #68b8d9;
+        --accent-soft: #2f5a6e;
+        --option-bg: #26343f;
+        --option-hover: #324857;
+        --option-selected: #2a6075;
+        --btn-bg: #3d7e9a;
+        --btn-text: #f0f7fc;
+        --btn-disabled: #3b4d5a;
+        --shadow: rgba(0,0,0,0.5) 0 10px 20px;
+        --tag: #253b47;
+      }
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .srs-container {
+      max-width: 800px;
+      width: 100%;
+      background: var(--card);
+      border-radius: 2rem;
+      box-shadow: var(--shadow);
+      padding: 2rem 1.8rem;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(2px);
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    h1 small {
+      font-size: 0.9rem;
+      font-weight: 400;
+      background: var(--tag);
+      color: var(--text-light);
+      padding: 0.25rem 0.8rem;
+      border-radius: 40px;
+      border: 1px solid var(--border);
+    }
+
+    .sub {
+      color: var(--text-light);
+      border-left: 4px solid var(--accent);
+      padding-left: 1rem;
+      margin: 1rem 0 1.8rem 0;
+      font-style: italic;
+    }
+
+    /* progress header */
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.5rem 1rem;
+      margin-bottom: 1.8rem;
+      font-size: 0.95rem;
+      background: var(--option-bg);
+      padding: 1rem 1.4rem;
+      border-radius: 2rem;
+      border: 1px solid var(--border);
+    }
+
+    .badge {
+      background: var(--accent-soft);
+      color: var(--text);
+      padding: 0.3rem 1rem;
+      border-radius: 40px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge span {
+      background: var(--card);
+      padding: 0.1rem 0.7rem;
+      border-radius: 30px;
+      font-weight: 600;
+      margin-left: 0.3rem;
+    }
+
+    .reset-btn {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--text-light);
+      padding: 0.2rem 1rem;
+      border-radius: 40px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .reset-btn:hover {
+      background: var(--option-hover);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* main card : word + quiz */
+    .quiz-card {
+      background: var(--option-bg);
+      border-radius: 2rem;
+      padding: 2rem 1.5rem;
+      border: 1px solid var(--border);
+      margin: 1.8rem 0 1.5rem;
+    }
+
+    .korean-word {
+      font-size: 3.5rem;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.2;
+      margin-bottom: 1.2rem;
+      word-break: keep-all;
+      color: var(--accent);
+      text-shadow: 0 2px 5px var(--shadow);
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      margin: 1.8rem 0 1rem;
+    }
+
+    .option {
+      background: var(--card);
+      border: 2px solid var(--border);
+      padding: 1rem 1.5rem;
+      border-radius: 60px;
+      font-size: 1.2rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.1s;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+
+    .option:hover:not(.disabled-option) {
+      background: var(--option-hover);
+      border-color: var(--accent);
+      transform: scale(1.01);
+    }
+
+    .option.selected-correct {
+      background: #25805a30;
+      border-color: #1b8c5a;
+      font-weight: 600;
+    }
+    .dark .option.selected-correct { background: #1d584130; border-color: #3bb37b; }
+
+    .option.selected-wrong {
+      background: #b3414130;
+      border-color: #b34141;
+    }
+
+    .prefix { color: var(--accent); font-weight: 600; margin-right: 0.5rem; }
+
+    .disabled-option {
+      opacity: 0.7;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .feedback {
+      min-height: 3.5rem;
+      background: var(--card);
+      border-radius: 3rem;
+      padding: 1rem 1.8rem;
+      margin: 1.8rem 0 0.5rem;
+      border-left: 8px solid var(--accent);
+      box-shadow: inset 0 1px 3px var(--shadow);
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.8rem;
+      margin-top: 1.8rem;
+    }
+
+    .btn {
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border: none;
+      padding: 0.9rem 2rem;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.1s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      border: 1px solid transparent;
+      flex: 1 1 auto;
+    }
+
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled {
+      background: var(--btn-disabled);
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 2px solid var(--border);
+      box-shadow: none;
+    }
+
+    .example-box {
+      background: var(--tag);
+      border-radius: 2rem;
+      padding: 1rem 1.8rem;
+      font-size: 1rem;
+      border: 1px dashed var(--accent-soft);
+      margin: 0.5rem 0 0;
+      color: var(--text-light);
+    }
+
+    .example-box strong { color: var(--accent); font-weight: 600; }
+
+    hr { border: 0.5px solid var(--border); margin: 2rem 0 1rem; }
+
+    .word-list-toggle {
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0.3rem 0;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .word-tag {
+      background: var(--tag);
+      border-radius: 40px;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
+      border: 1px solid var(--border);
+      color: var(--text);
+      display: flex;
+      justify-content: space-between;
+    }
+    .word-tag .eng { color: var(--accent); font-weight: 500; margin-left: 0.4rem; }
+
+    footer {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      text-align: right;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+<div class="srs-container" id="app">
+  <header style="display: flex; justify-content: space-between; align-items: center;">
+    <h1>🔁 SRS 초급 어휘 <small>day 1</small></h1>
+    <button class="reset-btn" id="resetProgress">⟲ reset</button>
+  </header>
+  <div class="sub">✔ 15 단어 · 평가하다 / 연구하다 / 업무 … — spaced repetition</div>
+
+  <!-- progress panel -->
+  <div class="stats-row">
+    <div class="badge">📌 복습할 단어 <span id="dueCount">15</span></div>
+    <div class="badge">✅ 완료 <span id="masteredCount">0</span></div>
+    <div class="badge">🎯 전체 <span>15</span></div>
+  </div>
+
+  <!-- QUIZ ZONE -->
+  <div class="quiz-card" id="quizArea">
+    <div class="korean-word" id="currentWord">평가하다</div>
+    <div class="quiz-options" id="optionsContainer"></div>
+    <div class="feedback" id="feedbackMsg">👉 보기를 선택하세요.</div>
+  </div>
+
+  <!-- example area (dynamic) -->
+  <div class="example-box" id="exampleSentence">💬 예문: 선생님은 학생의 발표를 평가하다.</div>
+
+  <!-- control buttons -->
+  <div class="btn-group">
+    <button class="btn" id="submitBtn" disabled>✓ 정답 확인</button>
+    <button class="btn btn-outline" id="nextBtn" disabled>▶ 다음 단어</button>
+  </div>
+
+  <!-- hidden word list with meanings & examples (correctness check) -->
+  <hr>
+  <details>
+    <summary class="word-list-toggle">📖 전체 단어 목록 (15개) ▼</summary>
+    <div class="mini-grid" id="wordListGrid"></div>
+  </details>
+  <footer>⚡ 간격 반복 (SRS) — 맞힌 간격 증가 · 틀리면 다시 0</footer>
+</div>
+
+<script>
+  (function() {
+    // ----- WORDS DATASET (exactly given) + examples -----
+    const words = [
+      { kr: "평가하다",    en: "Evaluate",    example: "선생님은 학생의 발표를 평가하다." },
+      { kr: "연구하다",    en: "Research",    example: "과학자가 새로운 약을 연구하다." },
+      { kr: "업무",        en: "Work",        example: "오늘 해야 할 업무가 많다." },
+      { kr: "기념",        en: "Commemorate / celebrate", example: "우리는 승리를 기념하다." },
+      { kr: "이롭다",      en: "Beneficial",  example: "규칙적인 운동은 건강에 이롭다." },
+      { kr: "성과",        en: "Result",      example: "이번 프로젝트의 성과가 좋다." },
+      { kr: "증진하다",    en: "Enhance / appreciate", example: "협력이 업무 효율을 증진하다." },
+      { kr: "위험하다",    en: "Dangerous",   example: "겨울에 빙판길은 위험하다." },
+      { kr: "완성되다",    en: "Complete",    example: "드디어 그림이 완성되다." },
+      { kr: "이유",        en: "Reason",      example: "그가 늦은 이유를 알다." },
+      { kr: "힘들다",      en: "Difficult",   example: "한국어 배우기가 힘들다?" },
+      { kr: "일깨우다",    en: "Enlighten / advise", example: "스승이 진리를 일깨우다." },
+      { kr: "이론",        en: "Theory",      example: "그 이론은 복잡하지만 흥미롭다." },
+      { kr: "자극하다",    en: "Stimulate / encourage", example: "칭찬은 학생을 자극하다." },
+      { kr: "효율성",      en: "Efficiency",  example: "이 방법은 효율성이 높다." }
+    ];
+
+    // ----- SRS state -----
+    let srsLevels = []; // 0..n : 0 = new/forgotten, 1,2,3... (delay = 2^level days, but we use simpler intervals)
+    let nextDue = [];    // timestamp (ms) ; initially all due now
+    let masteredCount = 0;
+
+    // current quiz index
+    let currentIdx = 0;
+    let selectedOption = null;        // index (0..3)
+    let submitted = false;
+    let correctAnswerEn = "";         // for internal check
+
+    // DOM elements
+    const currentWordEl = document.getElementById('currentWord');
+    const optionsEl = document.getElementById('optionsContainer');
+    const feedbackEl = document.getElementById('feedbackMsg');
+    const exampleEl = document.getElementById('exampleSentence');
+    const submitBtn = document.getElementById('submitBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const dueSpan = document.getElementById('dueCount');
+    const masteredSpan = document.getElementById('masteredCount');
+    const resetBtn = document.getElementById('resetProgress');
+    const wordGrid = document.getElementById('wordListGrid');
+
+    // Helper: initialize SRS
+    function initSRS() {
+      const now = Date.now();
+      srsLevels = words.map(() => 0);           // all start at 0 (new)
+      nextDue = words.map(() => now);            // all due now
+      masteredCount = 0;
+      saveState();
+    }
+
+    // Load / save localStorage (optional)
+    function loadState() {
+      try {
+        const saved = localStorage.getItem('srs_vocab_15');
+        if (saved) {
+          const data = JSON.parse(saved);
+          if (data.srsLevels && data.nextDue && data.srsLevels.length === words.length) {
+            srsLevels = data.srsLevels;
+            nextDue = data.nextDue;
+            masteredCount = srsLevels.filter(lvl => lvl >= 5).length; // consider level 5+ mastered (just visual)
+            return;
+          }
+        }
+        initSRS();
+      } catch { initSRS(); }
+    }
+    function saveState() {
+      masteredCount = srsLevels.filter(lvl => lvl >= 5).length; // any level >=5 -> mastered
+      localStorage.setItem('srs_vocab_15', JSON.stringify({ srsLevels, nextDue }));
+      updateStatsUI();
+    }
+
+    // update due/master counters
+    function updateStatsUI() {
+      const now = Date.now();
+      const due = nextDue.filter(ts => ts <= now).length;
+      dueSpan.innerText = due;
+      masteredSpan.innerText = masteredCount;
+      renderWordGrid();
+    }
+
+    // choose next due word (simplest SRS: first due, if none due pick nearest)
+    function selectNextDueWord() {
+      const now = Date.now();
+      let idx = -1;
+      for (let i = 0; i < words.length; i++) {
+        if (nextDue[i] <= now) { idx = i; break; }
+      }
+      if (idx === -1) {
+        // all future: pick smallest nextDue
+        let minTime = Infinity;
+        for (let i = 0; i < words.length; i++) {
+          if (nextDue[i] < minTime) { minTime = nextDue[i]; idx = i; }
+        }
+      }
+      return idx !== -1 ? idx : 0; // fallback
+    }
+
+    // generate random distractors (English definitions)
+    function getRandomDistractors(correctEn, count = 3) {
+      let others = words.filter(w => w.en !== correctEn).map(w => w.en);
+      // shuffle and pick unique
+      others = [...new Set(others)]; // unique
+      for (let i = others.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [others[i], others[j]] = [others[j], others[i]];
+      }
+      let selected = others.slice(0, count);
+      while (selected.length < count) { selected.push('(none)'); } // fallback
+      return selected;
+    }
+
+    // render quiz for currentIdx
+    function renderQuiz() {
+      const word = words[currentIdx];
+      currentWordEl.innerText = word.kr;
+      exampleEl.innerText = `💬 예문: ${word.example}`;
+      correctAnswerEn = word.en;
+
+      // build options: correct + 3 random
+      const dists = getRandomDistractors(word.en, 3);
+      const allOptions = [word.en, ...dists];
+      // shuffle
+      for (let i = allOptions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allOptions[i], allOptions[j]] = [allOptions[j], allOptions[i]];
+      }
+
+      // render option buttons
+      optionsEl.innerHTML = '';
+      selectedOption = null;
+      submitted = false;
+      submitBtn.disabled = false;
+      nextBtn.disabled = true;
+      feedbackEl.innerText = '👉 보기를 선택하세요.';
+      feedbackEl.style.borderLeftColor = 'var(--accent)';
+
+      allOptions.forEach((opt, idx) => {
+        const optDiv = document.createElement('div');
+        optDiv.className = 'option';
+        optDiv.dataset.optIndex = idx;
+        optDiv.dataset.optValue = opt;
+        optDiv.innerHTML = `<span class="prefix">●</span> ${opt}`;
+        optDiv.addEventListener('click', () => {
+          if (submitted) return; // ignore after submit
+          // deselect previous
+          document.querySelectorAll('.option').forEach(el => el.classList.remove('selected-correct', 'selected-wrong'));
+          optDiv.classList.add(selectedOption === idx ? '' : 'selected-correct'); // just highlight
+          selectedOption = idx;
+          // remove any other selection style
+          optDiv.classList.add('selected-correct');
+        });
+        optionsEl.appendChild(optDiv);
+      });
+    }
+
+    // handle submit answer
+    function handleSubmit() {
+      if (submitted) return;
+      if (selectedOption === null) {
+        feedbackEl.innerText = '⚠️ 먼저 답을 선택해 주세요.';
+        return;
+      }
+
+      submitted = true;
+      const chosenOpt = document.querySelector(`.option[data-opt-index="${selectedOption}"]`);
+      const chosenEn = chosenOpt.dataset.optValue;
+      const isCorrect = (chosenEn === correctAnswerEn);
+
+      // mark correct/wrong visually
+      document.querySelectorAll('.option').forEach(opt => {
+        opt.classList.remove('selected-correct', 'selected-wrong');
+        opt.style.pointerEvents = 'none';
+        opt.classList.add('disabled-option');
+      });
+
+      if (isCorrect) {
+        chosenOpt.classList.add('selected-correct');
+        feedbackEl.innerText = '✅ 정답입니다! 기억을 강화하세요.';
+        feedbackEl.style.borderLeftColor = '#2e9b5c';
+        // SRS: increase level, set next due
+        srsLevels[currentIdx] = Math.min(srsLevels[currentIdx] + 1, 8); // cap 8
+        const days = Math.pow(2, srsLevels[currentIdx]); // 2^level days (approx)
+        const dueTime = Date.now() + days * 24 * 60 * 60 * 1000;
+        nextDue[currentIdx] = dueTime;
+      } else {
+        chosenOpt.classList.add('selected-wrong');
+        // also highlight correct one
+        document.querySelectorAll('.option').forEach(opt => {
+          if (opt.dataset.optValue === correctAnswerEn) {
+            opt.classList.add('selected-correct');
+          }
+        });
+        feedbackEl.innerText = `❌ 오답입니다. 정답은 "${correctAnswerEn}" 입니다. 다시 학습합니다.`;
+        feedbackEl.style.borderLeftColor = '#b34141';
+        // reset level to 0, due soon (now + 10min for retry)
+        srsLevels[currentIdx] = 0;
+        nextDue[currentIdx] = Date.now() + 10 * 60 * 1000; // 10 min later
+      }
+
+      submitBtn.disabled = true;
+      nextBtn.disabled = false;
+      saveState();
+    }
+
+    // go to next word (SRS based)
+    function handleNext() {
+      // find next due word index
+      const newIdx = selectNextDueWord();
+      if (newIdx === undefined || newIdx === null) {
+        // fallback cycle
+        currentIdx = (currentIdx + 1) % words.length;
+      } else {
+        currentIdx = newIdx;
+      }
+      renderQuiz();
+      updateStatsUI();
+    }
+
+    // reset all progress
+    function resetAll() {
+      initSRS();
+      currentIdx = selectNextDueWord();
+      renderQuiz();
+      updateStatsUI();
+    }
+
+    // render mini word grid
+    function renderWordGrid() {
+      const now = Date.now();
+      wordGrid.innerHTML = words.map((w, i) => {
+        let status = nextDue[i] <= now ? '🔴' : '🟢';
+        if (srsLevels[i] >= 5) status = '✅';
+        return `<div class="word-tag"><span>${w.kr}</span> <span class="eng">${w.en.split('/')[0]} ${status}</span></div>`;
+      }).join('');
+    }
+
+    // ----- event binding -----
+    submitBtn.addEventListener('click', handleSubmit);
+    nextBtn.addEventListener('click', handleNext);
+    resetBtn.addEventListener('click', resetAll);
+
+    // start
+    loadState();
+    currentIdx = selectNextDueWord();
+    renderQuiz();
+    updateStatsUI();
+  })();
+</script>
+</body>
+</html>
