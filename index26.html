@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Korean Vocabulary Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+    h1, h2 { color: #ffcc00; }
+    .vocab-list {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    .vocab-item { margin: 10px 0; }
+    .quiz-container {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .option {
+      background: #2a2a2a;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .option:hover { background: #444; }
+    .correct { background: #2e7d32; }
+    .wrong { background: #c62828; }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: #ffcc00;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover { background: #e6b800; }
+    #score {
+      margin-top: 15px;
+      font-size: 18px;
+      color: #ffcc00;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Korean Vocabulary Trainer</h1>
+
+    <!-- Vocabulary List -->
+    <div class="vocab-list">
+      <h2>📘 Vocabulary List with Examples</h2>
+      <div class="vocab-item">1. 행복하다 = Happy → 나는 오늘 행복하다. (I am happy today.)</div>
+      <div class="vocab-item">2. 친환경 = Eco-Friendly → 친환경 제품을 사용합시다. (Let’s use eco-friendly products.)</div>
+      <div class="vocab-item">3. 피하다 = Avoid → 그는 문제를 피하려고 했다. (He tried to avoid the problem.)</div>
+      <div class="vocab-item">4. 욕구 = Desire → 성공에 대한 욕구가 크다. (He has a strong desire for success.)</div>
+      <div class="vocab-item">5. 제거하다 = Remove → 얼룩을 제거하다. (Remove the stain.)</div>
+      <div class="vocab-item">6. 개인 = Individual → 개인의 자유는 중요하다. (Individual freedom is important.)</div>
+      <div class="vocab-item">7. 저명하다 = Famous → 그는 저명한 학자이다. (He is a famous scholar.)</div>
+      <div class="vocab-item">8. 걱정하다 = Worry → 시험 때문에 걱정하다. (Worry about the exam.)</div>
+      <div class="vocab-item">9. 도입하다 = Introduce → 새로운 제도를 도입하다. (Introduce a new system.)</div>
+      <div class="vocab-item">10. 가난하다 = Poor → 그는 가난한 집에서 자랐다. (He grew up in a poor family.)</div>
+      <div class="vocab-item">11. ~에 비해서 = Compared to → 작년에 비해서 성적이 올랐다. (Compared to last year, grades improved.)</div>
+      <div class="vocab-item">12. 억울하다 = Unfair → 억울한 일을 당했다. (I suffered something unfair.)</div>
+      <div class="vocab-item">13. 전문성 = Expertise → 그녀는 높은 전문성을 가지고 있다. (She has high expertise.)</div>
+      <div class="vocab-item">14. 도움을 주다 = Help → 친구에게 도움을 주다. (Give help to a friend.)</div>
+      <div class="vocab-item">15. 리더 = Leader → 그는 팀의 리더이다. (He is the team leader.)</div>
+    </div>
+
+    <!-- Quiz Section -->
+    <div class="quiz-container">
+      <h2 id="question">Loading...</h2>
+      <div id="options"></div>
+      <button onclick="nextQuestion()">Next</button>
+      <div id="score">Score: 0 / 0</div>
+    </div>
+  </div>
+
+  <script>
+    const quiz = [
+      {q:"행복하다 means…", options:["Sad","Happy","Angry","Tired"], answer:1},
+      {q:"친환경 means…", options:["Eco-Friendly","Dangerous","Expensive","Traditional"], answer:0},
+      {q:"피하다 means…", options:["Avoid","Help","Introduce","Compare"], answer:0},
+      {q:"욕구 means…", options:["Desire","Fear","Worry","Remove"], answer:0},
+      {q:"제거하다 means…", options:["Add","Remove","Compare","Introduce"], answer:1},
+      {q:"개인 means…", options:["Group","Individual","Leader","Expertise"], answer:1},
+      {q:"저명하다 means…", options:["Unknown","Famous","Poor","Unfair"], answer:1},
+      {q:"걱정하다 means…", options:["Worry","Help","Avoid","Happy"], answer:0},
+      {q:"도입하다 means…", options:["Remove","Introduce","Avoid","Help"], answer:1},
+      {q:"가난하다 means…", options:["Rich","Poor","Famous","Eco-Friendly"], answer:1},
+      {q:"~에 비해서 means…", options:["Compared to","Remove","Help","Desire"], answer:0},
+      {q:"억울하다 means…", options:["Unfair","Happy","Leader","Expertise"], answer:0},
+      {q:"전문성 means…", options:["Expertise","Desire","Poor","Avoid"], answer:0},
+      {q:"도움을 주다 means…", options:["Help","Avoid","Introduce","Compare"], answer:0},
+      {q:"리더 means…", options:["Leader","Individual","Famous","Happy"], answer:0}
+    ];
+
+    let current = 0;
+    let score = 0;
+
+    function loadQuestion() {
+      document.getElementById("question").innerText = quiz[current].q;
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+      quiz[current].options.forEach((opt,i)=>{
+        const btn = document.createElement("div");
+        btn.className="option";
+        btn.innerText=opt;
+        btn.onclick=()=>checkAnswer(i,btn);
+        optionsDiv.appendChild(btn);
+      });
+      updateScore();
+    }
+
+    function checkAnswer(i,btn){
+      if(i===quiz[current].answer){
+        btn.classList.add("correct");
+        score++;
+      } else {
+        btn.classList.add("wrong");
+      }
+      updateScore();
+    }
+
+    function nextQuestion(){
+      current++;
+      if(current<quiz.length){
+        loadQuestion();
+      } else {
+        document.getElementById("question").innerText="🎉 Quiz Completed!";
+        document.getElementById("options").innerHTML="";
+        document.getElementById("score").innerText=`Final Score: ${score} / ${quiz.length}`;
+      }
+    }
+
+    function updateScore(){
+      document.getElementById("score").innerText=`Score: ${score} / ${quiz.length}`;
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
