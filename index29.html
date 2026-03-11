@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Korean Vocabulary SRS Builder</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --panel: rgba(255,255,255,0.88);
+      --panel-strong: #ffffff;
+      --text: #18202a;
+      --muted: #5c6878;
+      --border: rgba(24,32,42,0.08);
+      --accent: #4f46e5;
+      --accent-2: #7c3aed;
+      --good: #0f9d58;
+      --warn: #c2410c;
+      --bad: #b91c1c;
+      --shadow: 0 12px 35px rgba(31, 41, 55, 0.12);
+      --chip: #eef2ff;
+    }
+
+    body.dark {
+      --bg: #0b1020;
+      --panel: rgba(16, 24, 40, 0.84);
+      --panel-strong: #121a2c;
+      --text: #e7edf7;
+      --muted: #9cabbe;
+      --border: rgba(255,255,255,0.08);
+      --accent: #8b85ff;
+      --accent-2: #b08cff;
+      --good: #4ade80;
+      --warn: #fb923c;
+      --bad: #f87171;
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+      --chip: rgba(99,102,241,0.18);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(79,70,229,0.16), transparent 28%),
+        radial-gradient(circle at top right, rgba(124,58,237,0.16), transparent 24%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background .25s ease, color .25s ease;
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 24px 0 40px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.4fr .9fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--panel);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-main {
+      padding: 28px;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+    h1 {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      margin-bottom: 12px;
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.65;
+      max-width: 68ch;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    button, .btn {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .15s ease, opacity .2s ease, background .2s ease;
+    }
+    button:hover, .btn:hover { transform: translateY(-1px); }
+    button:active, .btn:active { transform: translateY(0); }
+
+    .primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+    }
+    .secondary {
+      background: var(--chip);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .hero-side {
+      padding: 22px;
+      display: grid;
+      gap: 14px;
+      align-content: center;
+    }
+
+    .stat {
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+    }
+    .stat strong {
+      display: block;
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+    }
+    .stat span { color: var(--muted); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 18px;
+    }
+
+    .section {
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: var(--chip);
+      color: var(--text);
+      font-size: .9rem;
+      font-weight: 700;
+    }
+
+    .word-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .word-row {
+      display: grid;
+      grid-template-columns: 54px 1fr;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+    }
+
+    .num {
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      font-weight: 800;
+    }
+
+    .word-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .korean {
+      font-size: 1.18rem;
+      font-weight: 800;
+    }
+    .english {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: .82rem;
+      font-weight: 800;
+    }
+    .ok { background: rgba(15,157,88,.14); color: var(--good); }
+    .fix { background: rgba(194,65,12,.14); color: var(--warn); }
+
+    .explain {
+      font-size: .94rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      line-height: 1.55;
+    }
+    .example {
+      display: grid;
+      gap: 4px;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(127,127,127,0.06);
+    }
+    .example .ko { font-weight: 700; }
+    .example .en { color: var(--muted); font-size: .94rem; }
+
+    .quiz-card {
+      padding: 22px;
+      position: sticky;
+      top: 18px;
+    }
+
+    .progress {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(127,127,127,0.18);
+      overflow: hidden;
+      margin: 14px 0 18px;
+    }
+    .progress > div {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      transition: width .25s ease;
+    }
+
+    .quiz-word {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    .quiz-question {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 900;
+      margin-bottom: 18px;
+      letter-spacing: -0.03em;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      background: var(--panel-strong);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 14px;
+      border-radius: 16px;
+      font-weight: 700;
+    }
+    .option.correct { outline: 2px solid rgba(15,157,88,.6); }
+    .option.wrong { outline: 2px solid rgba(185,28,28,.55); }
+
+    .feedback {
+      min-height: 72px;
+      background: rgba(127,127,127,0.06);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      line-height: 1.55;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .srs-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .srs-row button {
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 8px;
+      border-radius: 14px;
+      font-size: .9rem;
+    }
+
+    .mini {
+      margin-top: 16px;
+      display: grid;
+      gap: 10px;
+    }
+    .mini .statline {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: var(--panel-strong);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .95rem;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.6;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 980px) {
+      .hero, .grid { grid-template-columns: 1fr; }
+      .quiz-card { position: static; }
+    }
+
+    @media (max-width: 640px) {
+      .container { width: min(100% - 14px, 100%); }
+      .hero-main, .hero-side, .section, .quiz-card { padding: 16px; }
+      .word-row { grid-template-columns: 1fr; }
+      .num { width: 46px; height: 46px; border-radius: 14px; }
+      .srs-row { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <div class="card hero-main">
+        <div class="pill">Korean Vocabulary · Accuracy Check + Examples + SRS Quiz</div>
+        <h1>Build your initial Korean vocabulary the smart way.</h1>
+        <p class="sub">
+          I checked all 15 words, corrected the ones that need fixing, added example sentences,
+          and turned them into a spaced-repetition multiple-choice study set.
+        </p>
+        <div class="hero-actions">
+          <button class="primary" id="startQuizBtn">Start Quiz</button>
+          <button class="secondary" id="themeToggle">Toggle Dark Mode</button>
+        </div>
+      </div>
+      <aside class="card hero-side">
+        <div class="stat"><strong id="correctCount">0</strong><span>Words already correct</span></div>
+        <div class="stat"><strong id="fixedCount">0</strong><span>Words corrected or improved</span></div>
+        <div class="stat"><strong>15</strong><span>Total beginner vocabulary items</span></div>
+      </aside>
+    </section>
+
+    <div class="grid">
+      <main>
+        <section class="card section">
+          <div class="section-head">
+            <div>
+              <h2>Word Check + Examples</h2>
+              <p class="footer-note">Each item shows whether your word is correct, a note, and a simple example sentence.</p>
+            </div>
+            <div class="pill"><span id="listStatus">Loading...</span></div>
+          </div>
+          <div class="word-list" id="wordList"></div>
+        </section>
+      </main>
+
+      <aside>
+        <section class="card quiz-card">
+          <div class="section-head">
+            <div>
+              <h2>SRS Multiple-Choice Quiz</h2>
+              <p class="footer-note">Answer first, then rate difficulty with Again / Hard / Good / Easy.</p>
+            </div>
+          </div>
+
+          <div class="quiz-word" id="quizMeta">Question 1 of 15</div>
+          <div class="progress"><div id="progressBar"></div></div>
+          <div class="quiz-question" id="questionText">Loading...</div>
+          <div class="options" id="options"></div>
+          <div class="feedback" id="feedback">Choose the correct meaning to begin.</div>
+          <div class="srs-row">
+            <button data-rating="again">Again<br><small>10 min</small></button>
+            <button data-rating="hard">Hard<br><small>1 day</small></button>
+            <button data-rating="good">Good<br><small>3 days</small></button>
+            <button data-rating="easy">Easy<br><small>7 days</small></button>
+          </div>
+          <div class="mini">
+            <div class="statline"><span>Score</span><strong id="score">0 / 0</strong></div>
+            <div class="statline"><span>Mastered</span><strong id="mastered">0</strong></div>
+            <div class="statline"><span>Next review</span><strong id="nextReview">—</strong></div>
+          </div>
+          <p class="footer-note">
+            SRS idea: easier cards appear less often; difficult cards come back sooner. This helps long-term memory.
+          </p>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const words = [
+      {
+        id: 1,
+        input: "실행하다",
+        correct: "실행하다",
+        english: "implement / carry out",
+        status: "correct",
+        note: "Correct. '실행하다' means to implement, execute, or carry out a plan.",
+        exampleKo: "회사는 새로운 계획을 다음 달에 실행한다.",
+        exampleEn: "The company will implement the new plan next month."
+      },
+      {
+        id: 2,
+        input: "중시하다",
+        correct: "중시하다",
+        english: "emphasize / value highly",
+        status: "correct",
+        note: "Correct. It means to regard something as important.",
+        exampleKo: "그 학교는 창의성을 중시한다.",
+        exampleEn: "That school emphasizes creativity."
+      },
+      {
+        id: 3,
+        input: "깜빡하다",
+        correct: "깜빡하다",
+        english: "forget / absentmindedly forget",
+        status: "correct",
+        note: "Correct. In conversation, it often means to forget something by accident.",
+        exampleKo: "제가 숙제를 깜빡했어요.",
+        exampleEn: "I forgot my homework."
+      },
+      {
+        id: 4,
+        input: "안전",
+        correct: "안전",
+        english: "safety",
+        status: "correct",
+        note: "Correct. Common noun meaning safety.",
+        exampleKo: "안전이 가장 중요하다.",
+        exampleEn: "Safety is the most important thing."
+      },
+      {
+        id: 5,
+        input: "비판하다",
+        correct: "비판하다",
+        english: "criticize",
+        status: "correct",
+        note: "Correct. It means to criticize or critique.",
+        exampleKo: "언론은 그 결정을 강하게 비판했다.",
+        exampleEn: "The media strongly criticized the decision."
+      },
+      {
+        id: 6,
+        input: "정책",
+        correct: "정책",
+        english: "policy",
+        status: "correct",
+        note: "Correct. Often used for government or company policy.",
+        exampleKo: "정부는 새로운 교육 정책을 발표했다.",
+        exampleEn: "The government announced a new education policy."
+      },
+      {
+        id: 7,
+        input: "성숙하다",
+        correct: "성숙하다",
+        english: "mature",
+        status: "correct",
+        note: "Correct. It means to be mature or become mature.",
+        exampleKo: "그는 생각이 매우 성숙하다.",
+        exampleEn: "He is very mature in his thinking."
+      },
+      {
+        id: 8,
+        input: "폭력",
+        correct: "폭력",
+        english: "violence",
+        status: "correct",
+        note: "Correct. Used in contexts like school violence or domestic violence.",
+        exampleKo: "우리는 어떤 폭력도 반대한다.",
+        exampleEn: "We oppose all forms of violence."
+      },
+      {
+        id: 9,
+        input: "노력하다",
+        correct: "노력하다",
+        english: "endeavor / make an effort",
+        status: "correct",
+        note: "Correct. More natural everyday meaning is 'make an effort' or 'try hard'.",
+        exampleKo: "한국어를 잘하기 위해 매일 노력하고 있다.",
+        exampleEn: "I make an effort every day to improve my Korean."
+      },
+      {
+        id: 10,
+        input: "기준",
+        correct: "기준",
+        english: "standard / criterion",
+        status: "correct",
+        note: "Correct. It can mean a standard, criterion, or benchmark.",
+        exampleKo: "채용 기준이 매우 까다롭다.",
+        exampleEn: "The hiring standards are very strict."
+      },
+      {
+        id: 11,
+        input: "잃어버리다",
+        correct: "잃어버리다",
+        english: "lose",
+        status: "correct",
+        note: "Correct. Commonly used for losing objects like keys, wallets, or phones.",
+        exampleKo: "어제 지갑을 잃어버렸다.",
+        exampleEn: "I lost my wallet yesterday."
+      },
+      {
+        id: 12,
+        input: "전통",
+        correct: "전통",
+        english: "tradition",
+        status: "correct",
+        note: "Correct. Means tradition or cultural heritage.",
+        exampleKo: "한국의 전통 문화를 배우고 싶다.",
+        exampleEn: "I want to learn about Korean traditional culture."
+      },
+      {
+        id: 13,
+        input: "넣다",
+        correct: "넣다",
+        english: "put / insert",
+        status: "correct",
+        note: "Correct. A very common verb meaning to put something in.",
+        exampleKo: "가방에 책을 넣어 주세요.",
+        exampleEn: "Please put the book in the bag."
+      },
+      {
+        id: 14,
+        input: "다치다",
+        correct: "다치다",
+        english: "get hurt / be injured",
+        status: "correct",
+        note: "Correct. It means to get hurt or injured.",
+        exampleKo: "계단에서 넘어져서 다쳤어요.",
+        exampleEn: "I got hurt after falling on the stairs."
+      },
+      {
+        id: 15,
+        input: "복지",
+        correct: "복지",
+        english: "welfare",
+        status: "correct",
+        note: "Correct. Often used in terms like social welfare or employee benefits depending on context.",
+        exampleKo: "그 회사는 직원 복지가 좋다.",
+        exampleEn: "That company has good employee welfare benefits."
+      }
+    ];
+
+    const distractorPool = [
+      "decision", "culture", "memory", "policy", "habit", "profit", "effect", "choice",
+      "science", "method", "support", "value", "network", "region", "emotion", "energy"
+    ];
+
+    const wordList = document.getElementById('wordList');
+    const correctCountEl = document.getElementById('correctCount');
+    const fixedCountEl = document.getElementById('fixedCount');
+    const listStatus = document.getElementById('listStatus');
+    const themeToggle = document.getElementById('themeToggle');
+    const startQuizBtn = document.getElementById('startQuizBtn');
+    const questionText = document.getElementById('questionText');
+    const quizMeta = document.getElementById('quizMeta');
+    const optionsEl = document.getElementById('options');
+    const feedbackEl = document.getElementById('feedback');
+    const progressBar = document.getElementById('progressBar');
+    const scoreEl = document.getElementById('score');
+    const masteredEl = document.getElementById('mastered');
+    const nextReviewEl = document.getElementById('nextReview');
+
+    let queue = [...words];
+    let index = 0;
+    let correctAnswers = 0;
+    let answered = 0;
+    let lastCard = null;
+    const mastery = new Map();
+
+    function initTheme() {
+      const saved = localStorage.getItem('kv_theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.body.classList.add('dark');
+      }
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark');
+      localStorage.setItem('kv_theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+    }
+
+    function renderWords() {
+      const correctCount = words.filter(w => w.status === 'correct').length;
+      const fixedCount = words.filter(w => w.status === 'fixed').length;
+      correctCountEl.textContent = correctCount;
+      fixedCountEl.textContent = fixedCount;
+      listStatus.textContent = `${correctCount} correct · ${fixedCount} corrected`;
+
+      wordList.innerHTML = words.map(w => `
+        <article class="word-row">
+          <div class="num">${w.id}</div>
+          <div>
+            <div class="word-top">
+              <span class="korean">${w.input}</span>
+              ${w.input !== w.correct ? `<span class="english">→ ${w.correct}</span>` : `<span class="english">= ${w.english}</span>`}
+              <span class="badge ${w.status === 'correct' ? 'ok' : 'fix'}">${w.status === 'correct' ? 'Correct' : 'Corrected'}</span>
+            </div>
+            <div class="explain">${w.note}</div>
+            <div class="example">
+              <div class="ko">${w.exampleKo}</div>
+              <div class="en">${w.exampleEn}</div>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function getOptions(word) {
+      const wordMeanings = words.map(w => w.english);
+      const pool = [...new Set([...wordMeanings, ...distractorPool])].filter(v => v !== word.english);
+      const distractors = shuffle(pool).slice(0, 3);
+      return shuffle([word.english, ...distractors]);
+    }
+
+    function renderQuestion() {
+      if (index >= queue.length) {
+        questionText.textContent = 'Session complete 🎉';
+        quizMeta.textContent = `Finished ${answered} questions`;
+        optionsEl.innerHTML = '';
+        feedbackEl.innerHTML = 'Great work. Use the SRS buttons after each answer next time to simulate review intervals.';
+        progressBar.style.width = '100%';
+        return;
+      }
+
+      const word = queue[index];
+      lastCard = word;
+      const options = getOptions(word);
+      quizMeta.textContent = `Question ${index + 1} of ${queue.length}`;
+      questionText.textContent = `What is “${word.correct}”?`;
+      feedbackEl.textContent = 'Choose the correct meaning.';
+      progressBar.style.width = `${(index / queue.length) * 100}%`;
+
+      optionsEl.innerHTML = '';
+      options.forEach(option => {
+        const btn = document.createElement('button');
+        btn.className = 'option';
+        btn.textContent = option;
+        btn.onclick = () => checkAnswer(btn, option, word);
+        optionsEl.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(button, option, word) {
+      const buttons = [...document.querySelectorAll('.option')];
+      const isCorrect = option === word.english;
+      answered += 1;
+      if (isCorrect) correctAnswers += 1;
+      scoreEl.textContent = `${correctAnswers} / ${answered}`;
+
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        if (btn.textContent === word.english) btn.classList.add('correct');
+      });
+      if (!isCorrect) button.classList.add('wrong');
+
+      feedbackEl.innerHTML = isCorrect
+        ? `<strong>Correct.</strong> ${word.correct} = ${word.english}. Example: ${word.exampleEn}`
+        : `<strong>Not quite.</strong> The correct answer is <strong>${word.english}</strong>.<br>${word.exampleKo}<br>${word.exampleEn}`;
+    }
+
+    function applySRS(rating) {
+      if (!lastCard) return;
+      const intervals = {
+        again: '10 minutes',
+        hard: '1 day',
+        good: '3 days',
+        easy: '7 days'
+      };
+
+      const current = mastery.get(lastCard.correct) || 0;
+      let nextMastery = current;
+      if (rating === 'again') nextMastery = Math.max(0, current - 1);
+      if (rating === 'hard') nextMastery = current + 0.5;
+      if (rating === 'good') nextMastery = current + 1;
+      if (rating === 'easy') nextMastery = current + 2;
+      mastery.set(lastCard.correct, nextMastery);
+
+      const masteredCount = [...mastery.values()].filter(v => v >= 2).length;
+      masteredEl.textContent = String(masteredCount);
+      nextReviewEl.textContent = intervals[rating];
+
+      index += 1;
+      renderQuestion();
+    }
+
+    document.querySelectorAll('[data-rating]').forEach(btn => {
+      btn.addEventListener('click', () => applySRS(btn.dataset.rating));
+    });
+
+    startQuizBtn.addEventListener('click', () => {
+      document.querySelector('.quiz-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    themeToggle.addEventListener('click', toggleTheme);
+
+    initTheme();
+    renderWords();
+    renderQuestion();
+  </script>
+</body>
+</html>
