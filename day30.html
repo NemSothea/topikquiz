@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Korean Vocabulary SRS Quiz</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #4f46e5;
+      --accent-2: #06b6d4;
+      --good: #059669;
+      --bad: #dc2626;
+      --border: #e5e7eb;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    body.dark {
+      --bg: #0b1220;
+      --panel: #111827;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #818cf8;
+      --accent-2: #22d3ee;
+      --good: #34d399;
+      --bad: #f87171;
+      --border: #243041;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, rgba(79,70,229,0.12), transparent 30%), var(--bg);
+      color: var(--text);
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 20px;
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    h1, h2, h3 { margin: 0 0 12px; }
+    h1 { font-size: clamp(1.8rem, 3vw, 2.8rem); }
+    h2 { font-size: 1.25rem; }
+    p { color: var(--muted); line-height: 1.6; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(79, 70, 229, 0.12);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .btn, button {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      background: var(--accent);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.2s ease, background 0.2s ease;
+    }
+
+    .btn:hover, button:hover { transform: translateY(-1px); }
+    .btn.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 20px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .stat {
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.5rem;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .word-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      overflow: hidden;
+      border-radius: 18px;
+    }
+
+    .word-table th, .word-table td {
+      text-align: left;
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .word-table th {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .status-ok { color: var(--good); font-weight: 700; }
+    .status-fix { color: #f59e0b; font-weight: 700; }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      background: rgba(6,182,212,0.12);
+      color: var(--accent-2);
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    .quiz-card {
+      position: sticky;
+      top: 18px;
+    }
+
+    .word-big {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      margin: 8px 0;
+      letter-spacing: -0.02em;
+    }
+
+    .choices {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .choice {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      text-align: left;
+      width: 100%;
+    }
+
+    .choice.correct {
+      border-color: var(--good);
+      color: var(--good);
+      background: rgba(5,150,105,0.08);
+    }
+
+    .choice.wrong {
+      border-color: var(--bad);
+      color: var(--bad);
+      background: rgba(220,38,38,0.08);
+    }
+
+    .feedback {
+      min-height: 48px;
+      margin-top: 14px;
+      font-weight: 700;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .progress-wrap {
+      margin: 14px 0 10px;
+    }
+
+    .progress {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(127,127,127,0.18);
+      overflow: hidden;
+    }
+
+    .progress > div {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width 0.3s ease;
+    }
+
+    .small { font-size: 0.92rem; color: var(--muted); }
+
+    .srs-boxes {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .box {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      text-align: center;
+    }
+
+    .box strong { display: block; font-size: 1.2rem; }
+
+    @media (max-width: 900px) {
+      .hero, .grid { grid-template-columns: 1fr; }
+      .quiz-card { position: static; }
+      .stats, .srs-boxes { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 560px) {
+      .stats, .srs-boxes { grid-template-columns: 1fr; }
+      .word-table th:nth-child(3), .word-table td:nth-child(3) { display: none; }
+      .container { padding: 14px; }
+      .card { padding: 16px; border-radius: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="badge">Korean Vocabulary • 15 Words • SRS Quiz</div>
+      <button id="themeToggle" class="btn secondary">Toggle Dark Mode</button>
+    </div>
+
+    <section class="hero">
+      <div class="card">
+        <h1>Korean Initial Vocabulary Builder</h1>
+        <p>This study page checks your translations, gives a natural English meaning, adds one example for each word, and uses a simple <strong>spaced repetition system</strong> inspired by Leitner boxes. Correct answers move a word up; wrong answers move it back for more review.</p>
+        <div class="stats">
+          <div class="stat"><strong id="score">0</strong><span class="small">Correct answers</span></div>
+          <div class="stat"><strong id="answered">0</strong><span class="small">Answered</span></div>
+          <div class="stat"><strong id="mastered">0</strong><span class="small">Mastered words</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>SRS Review Guide</h2>
+        <p><strong>Box 1</strong>: new or missed words<br>
+           <strong>Box 2–3</strong>: getting familiar<br>
+           <strong>Box 4–5</strong>: stronger memory</p>
+        <p class="small">Study tip: review often at first, then give more time to words in higher boxes. This is the core idea of SRS.</p>
+        <div class="srs-boxes" id="srsBoxes"></div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Word Check + Examples</h2>
+        <p>Your list is mostly correct. A few items are understandable but sound more natural with a slightly better English meaning.</p>
+        <table class="word-table">
+          <thead>
+            <tr>
+              <th>Korean</th>
+              <th>Check / Better Meaning</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody id="wordRows"></tbody>
+        </table>
+      </div>
+
+      <div class="card quiz-card">
+        <h2>Multiple-Choice Quiz</h2>
+        <div class="progress-wrap">
+          <div class="small" id="progressText">Question 1 of 15</div>
+          <div class="progress"><div id="progressBar"></div></div>
+        </div>
+        <div class="pill" id="boxLabel">Review Box 1</div>
+        <div class="word-big" id="quizWord">갈등</div>
+        <p id="quizHint">Choose the best English meaning.</p>
+        <div class="choices" id="choices"></div>
+        <div class="feedback" id="feedback"></div>
+        <div class="row">
+          <button id="nextBtn">Next</button>
+          <button id="restartBtn" class="btn secondary">Restart</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const vocab = [
+      {
+        korean: "갈등",
+        userMeaning: "Conflict",
+        correct: true,
+        betterMeaning: "conflict",
+        note: "Correct.",
+        example: "팀 안의 갈등을 해결해야 해요. = We need to solve the conflict in the team.",
+        choices: ["conflict", "vacation", "recipe", "victory"]
+      },
+      {
+        korean: "놓치다",
+        userMeaning: "Miss",
+        correct: true,
+        betterMeaning: "miss / lose / let slip",
+        note: "Correct. 'Miss' is the most common beginner meaning.",
+        example: "버스를 놓치지 마세요. = Don't miss the bus.",
+        choices: ["repair", "miss", "hide", "borrow"]
+      },
+      {
+        korean: "가치가 있다",
+        userMeaning: "Valuable",
+        correct: false,
+        betterMeaning: "be worth it / be valuable",
+        note: "Understandable, but as a phrase it is more naturally 'be worth it' or 'have value.'",
+        example: "그 책은 읽을 가치가 있어요. = That book is worth reading.",
+        choices: ["be worth it", "be noisy", "be crowded", "be surprised"]
+      },
+      {
+        korean: "명예",
+        userMeaning: "Honor",
+        correct: true,
+        betterMeaning: "honor",
+        note: "Correct.",
+        example: "그는 가족의 명예를 중요하게 생각해요. = He thinks his family's honor is important.",
+        choices: ["honor", "weather", "danger", "distance"]
+      },
+      {
+        korean: "다르다",
+        userMeaning: "Different",
+        correct: true,
+        betterMeaning: "be different",
+        note: "Correct, but verbs in Korean often sound more natural with 'be.'",
+        example: "두 문화는 많이 달라요. = The two cultures are very different.",
+        choices: ["be different", "be safe", "be late", "be sleepy"]
+      },
+      {
+        korean: "고민하다",
+        userMeaning: "Worry",
+        correct: false,
+        betterMeaning: "worry / think deeply about / 고민 over",
+        note: "Partly correct. It often means thinking seriously about a problem, not only worrying.",
+        example: "진로에 대해 많이 고민하고 있어요. = I'm thinking deeply about my career path.",
+        choices: ["think deeply about", "laugh loudly", "arrive early", "eat quickly"]
+      },
+      {
+        korean: "의견",
+        userMeaning: "Opinion",
+        correct: true,
+        betterMeaning: "opinion",
+        note: "Correct.",
+        example: "제 의견을 말해도 될까요? = May I share my opinion?",
+        choices: ["opinion", "memory", "package", "promise"]
+      },
+      {
+        korean: "불법",
+        userMeaning: "Illegal",
+        correct: true,
+        betterMeaning: "illegal / unlawful",
+        note: "Correct.",
+        example: "그것은 불법 행위예요. = That is an illegal act.",
+        choices: ["illegal", "expensive", "helpful", "polite"]
+      },
+      {
+        korean: "심하다",
+        userMeaning: "Severe",
+        correct: true,
+        betterMeaning: "be severe / be terrible / be too much",
+        note: "Correct, though meaning changes with context.",
+        example: "오늘은 감기가 심해요. = My cold is severe today.",
+        choices: ["be severe", "be famous", "be quiet", "be warm"]
+      },
+      {
+        korean: "주시하다",
+        userMeaning: "Observe",
+        correct: false,
+        betterMeaning: "watch closely / keep an eye on",
+        note: "Close, but 'observe' can sound too general. 'Watch closely' fits better in many cases.",
+        example: "경찰이 상황을 주시하고 있어요. = The police are closely watching the situation.",
+        choices: ["watch closely", "cook slowly", "speak clearly", "wait outside"]
+      },
+      {
+        korean: "자기주도",
+        userMeaning: "Self-directed",
+        correct: false,
+        betterMeaning: "self-directedness / self-led",
+        note: "The idea is right, but 자기주도 is often used like a noun or modifier, as in 자기주도 학습 = self-directed learning.",
+        example: "자기주도 학습이 중요해요. = Self-directed learning is important.",
+        choices: ["self-directedness", "friendliness", "sadness", "adventure"]
+      },
+      {
+        korean: "정부",
+        userMeaning: "Government",
+        correct: true,
+        betterMeaning: "government",
+        note: "Correct.",
+        example: "정부는 새 정책을 발표했어요. = The government announced a new policy.",
+        choices: ["government", "library", "village", "festival"]
+      },
+      {
+        korean: "결정하다",
+        userMeaning: "Decide",
+        correct: true,
+        betterMeaning: "decide",
+        note: "Correct.",
+        example: "오늘 메뉴를 결정합시다. = Let's decide the menu today.",
+        choices: ["decide", "return", "climb", "invite"]
+      },
+      {
+        korean: "개발하다",
+        userMeaning: "Develop",
+        correct: true,
+        betterMeaning: "develop",
+        note: "Correct.",
+        example: "회사는 새로운 앱을 개발하고 있어요. = The company is developing a new app.",
+        choices: ["develop", "forget", "compare", "explode"]
+      },
+      {
+        korean: "방해하다",
+        userMeaning: "Interrupt",
+        correct: true,
+        betterMeaning: "interrupt / disturb / interfere with",
+        note: "Correct.",
+        example: "공부를 방해하지 마세요. = Please don't interrupt my studying.",
+        choices: ["interrupt", "connect", "forgive", "translate"]
+      }
+    ];
+
+    let queue = [];
+    let currentIndex = 0;
+    let score = 0;
+    let answered = 0;
+    let waitingNext = false;
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function initWords() {
+      vocab.forEach((item, idx) => {
+        item.id = idx;
+        item.box = 1;
+        item.seen = 0;
+      });
+    }
+
+    function buildQueue() {
+      const weighted = [];
+      vocab.forEach(item => {
+        const repeats = 6 - item.box;
+        for (let i = 0; i < repeats; i++) weighted.push(item.id);
+      });
+      queue = shuffle(weighted).slice(0, 15);
+      currentIndex = 0;
+    }
+
+    function renderTable() {
+      const rows = document.getElementById('wordRows');
+      rows.innerHTML = vocab.map(item => `
+        <tr>
+          <td>
+            <strong>${item.korean}</strong><br>
+            <span class="small">Your answer: ${item.userMeaning}</span>
+          </td>
+          <td>
+            <span class="${item.correct ? 'status-ok' : 'status-fix'}">${item.correct ? 'Correct' : 'Refine'}</span><br>
+            <strong>${item.betterMeaning}</strong><br>
+            <span class="small">${item.note}</span>
+          </td>
+          <td>${item.example}</td>
+        </tr>
+      `).join('');
+    }
+
+    function updateStats() {
+      document.getElementById('score').textContent = score;
+      document.getElementById('answered').textContent = answered;
+      document.getElementById('mastered').textContent = vocab.filter(v => v.box >= 4).length;
+
+      const boxWrap = document.getElementById('srsBoxes');
+      const counts = [1,2,3,4,5].map(box => vocab.filter(v => v.box === box).length);
+      boxWrap.innerHTML = counts.map((count, i) => `
+        <div class="box">
+          <div class="small">Box ${i + 1}</div>
+          <strong>${count}</strong>
+        </div>
+      `).join('');
+    }
+
+    function renderQuestion() {
+      waitingNext = false;
+      document.getElementById('feedback').textContent = '';
+
+      if (currentIndex >= queue.length) {
+        document.getElementById('quizWord').textContent = 'Finished!';
+        document.getElementById('quizHint').textContent = 'You completed 15 review questions. Restart to review again with SRS weighting.';
+        document.getElementById('choices').innerHTML = '';
+        document.getElementById('progressText').textContent = `Completed ${queue.length} of ${queue.length}`;
+        document.getElementById('progressBar').style.width = '100%';
+        document.getElementById('boxLabel').textContent = 'Session Complete';
+        return;
+      }
+
+      const item = vocab.find(v => v.id === queue[currentIndex]);
+      const choices = shuffle(item.choices);
+
+      document.getElementById('quizWord').textContent = item.korean;
+      document.getElementById('quizHint').textContent = 'Choose the best English meaning.';
+      document.getElementById('progressText').textContent = `Question ${currentIndex + 1} of ${queue.length}`;
+      document.getElementById('progressBar').style.width = `${(currentIndex / queue.length) * 100}%`;
+      document.getElementById('boxLabel').textContent = `Review Box ${item.box}`;
+
+      document.getElementById('choices').innerHTML = choices.map(choice => `
+        <button class="choice" data-choice="${choice}">${choice}</button>
+      `).join('');
+
+      document.querySelectorAll('.choice').forEach(btn => {
+        btn.addEventListener('click', () => handleAnswer(btn, item));
+      });
+    }
+
+    function handleAnswer(btn, item) {
+      if (waitingNext) return;
+      waitingNext = true;
+      answered++;
+      item.seen++;
+
+      const buttons = [...document.querySelectorAll('.choice')];
+      buttons.forEach(b => b.disabled = true);
+
+      if (btn.dataset.choice === item.choices[0]) {
+        btn.classList.add('correct');
+        score++;
+        item.box = Math.min(5, item.box + 1);
+        document.getElementById('feedback').innerHTML = `✅ Correct — <strong>${item.korean}</strong> = <strong>${item.betterMeaning}</strong><br><span class="small">${item.example}</span>`;
+      } else {
+        btn.classList.add('wrong');
+        const correctBtn = buttons.find(b => b.dataset.choice === item.choices[0]);
+        if (correctBtn) correctBtn.classList.add('correct');
+        item.box = 1;
+        document.getElementById('feedback').innerHTML = `❌ Not quite — correct answer: <strong>${item.choices[0]}</strong><br><span class="small">${item.example}</span>`;
+      }
+
+      updateStats();
+    }
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (currentIndex < queue.length) {
+        currentIndex++;
+        renderQuestion();
+      }
+    });
+
+    document.getElementById('restartBtn').addEventListener('click', () => {
+      score = 0;
+      answered = 0;
+      initWords();
+      buildQueue();
+      updateStats();
+      renderQuestion();
+    });
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      localStorage.setItem('kv_dark_mode', isDark ? '1' : '0');
+    });
+
+    if (localStorage.getItem('kv_dark_mode') === '1') {
+      document.body.classList.add('dark');
+    }
+
+    initWords();
+    buildQueue();
+    renderTable();
+    updateStats();
+    renderQuestion();
+  </script>
+</body>
+</html>
