@@ -559,12 +559,12 @@
             }, 3000);
         }
         
-        // Generate cards for all 30 days
+        // Generate cards for all 31 days
         function generateQuizCards() {
             const quizGrid = document.getElementById('quizGrid');
             quizGrid.innerHTML = '';
             
-            for (let day = 1; day <= 30; day++) {
+            for (let day = 1; day <= 31; day++) {
                 const dayStr = day.toString().padStart(2, '0');
                 const fileName = `day${dayStr}.html`;
                 const progressKey = `day${dayStr}`;
